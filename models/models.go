@@ -29,6 +29,7 @@ type User struct {
 
 // Post represents a post in the database.
 type Post struct {
+	ID         int64   `pg:",pk"`
 	PostID     string  `pg:",notnull,unique"`
 	Timestamp  string  `pg:",notnull"`
 	Sender     *User   `pg:",notnull"`

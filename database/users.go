@@ -31,7 +31,18 @@ func (db *Database) GetUser(userID string) (models.User, error) {
 }
 
 // GetAllUsers gets all users from the database.
-func (db *Database) GetAllUsers() error { return nil }
+func (db *Database) GetAllUsers() ([]models.User, error) {
+	var users []models.User
+	err := db.DB.Model(&users).Select()
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
 
 // DeleteUser deletes a user from the database
-func (db *Database) DeleteUser(userID string) error { return nil }
+func (db *Database) DeleteUser(userID string) error {
+	db.mux.Lock()
+	defer db.mux.Unlock()
+	return db.DB.Delete(&models.User{UserID: userID})
+}
