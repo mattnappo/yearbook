@@ -72,6 +72,6 @@ func (hash Hash) String() string {
 }
 
 // Bytes returns the bytes of the hash.
-func (hash Hash) Bytes() string {
+func (hash Hash) Bytes() []byte {
 	return hash[:]
 }

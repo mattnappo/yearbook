@@ -12,6 +12,10 @@ import (
 	"github.com/xoreo/yearbook/crypto"
 )
 
+var (
+	errInvalidEmail = errors.New("invalid email address")
+)
+
 // User represents a user.
 type User struct {
 	ID           string `pg:",notnull"`
@@ -37,9 +41,12 @@ type Post struct {
 func NewUserFromEmail(email string) (*User, error) {
 	if email[len(email)-len(common.EmailSuffix):] == common.EmailSuffix {
 		userData := strings.Split(email, ".")
+		if len(userData) != 3 {
+			return nil, errInvalidEmail
+		}
 		usernameLen := len(email) - len(common.EmailSuffix)
 		return &User{
-			ID:           crypto.Sha3String(email),
+			ID:           calcUserID(email),
 			Firstname:    userData[0],
 			Lastname:     strings.Split(userData[1], "@")[0],
 			Username:     email[0:usernameLen],
@@ -47,14 +54,19 @@ func NewUserFromEmail(email string) (*User, error) {
 			RegisterDate: time.Now().String(),
 		}, nil
 	}
-	return nil, errors.New("invalid email address")
+	return nil, errInvalidEmail
+}
+
+// calcUserID calculates the user ID.
+func calcUserID(email string) string {
+	return crypto.Sha3String(email)
 }
 
 // isValidUser checks if a User struct is valid
 func (user *User) isValid() bool {
 	l := len(user.Email) - len(common.EmailSuffix)
-	if user.Email[l:] == common.EmailSuffix {
-
+	if user.Email[l:] == common.EmailSuffix &&
+		len(strings.Split(user.Email, ".")) == 3 {
 		return true
 	}
 	return false
@@ -63,9 +75,9 @@ func (user *User) isValid() bool {
 // NewPost creates a new post.
 func NewPost(
 	sender *User,
-	recipients []*User,
 	message string,
 	imagePaths []string,
+	recipients ...*User,
 ) (*Post, error) {
 	// Check that all data for the post is valid
 	if sender == nil || len(recipients) > common.MaxRecipients ||
