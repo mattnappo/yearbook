@@ -14,9 +14,14 @@ import (
 type connStatus int
 
 const (
-	CONNECTED    = iota
+	// CONNECTED means the connection to the database is established.
+	CONNECTED = iota
+
+	// DISCONNECTED means the connection to the database is not established.
 	DISCONNECTED = iota
-	ERROR        = iota
+
+	// ERROR means the database is in some error state.
+	ERROR = iota
 )
 
 var (
@@ -59,8 +64,8 @@ func (db *Database) createSchema() error {
 	db.mux.Lock()
 	defer db.mux.Unlock()
 	for _, model := range []interface{}{
-		(*models.User)(nil),
-		(*models.Post)(nil)} {
+		(*models.User)(nil),   // Make the users table
+		(*models.Post)(nil)} { // make the posts table
 		err := db.DB.CreateTable(model, nil)
 		if err != nil {
 			return err
