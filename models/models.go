@@ -18,14 +18,29 @@ var (
 
 type image []byte
 
+// Grade is a grade enum.
+type Grade int
+
+const (
+	// Freshman represents a freshman.
+	Freshman = iota
+	// Sophomore represents a sophomore.
+	Sophomore = iota
+	// Junior represents a junior.
+	Junior = iota
+	// Senior represents a senior.
+	Senior = iota
+)
+
 // User represents a user.
 type User struct {
-	ID           int32     `pg:",pk"`
-	UserID       string    `pg:",notnull,unique"`
-	Firstname    string    `pg:",notnull"`
-	Lastname     string    `pg:",notnull"`
-	Username     string    `pg:",notnull"`
-	Email        string    `pg:",notnull"`
+	ID           int32  `pg:",pk"`
+	UserID       string `pg:",notnull,unique"`
+	Firstname    string `pg:",notnull"`
+	Lastname     string `pg:",notnull"`
+	Username     string `pg:",notnull"`
+	Email        string `pg:",notnull"`
+	Grade        Grade
 	RegisterDate time.Time `pg:",notnull"`
 }
 
@@ -41,20 +56,24 @@ type Post struct {
 	Images  []image `pg:",notnull,array"`
 }
 
-// NewUserFromEmail creates a *User given a valid email.
-func NewUserFromEmail(email string) (*User, error) {
+// NewUser creates a *User given a valid email and grade.
+func NewUser(email string, grade grade) (*User, error) {
+	// Check that the last part of the email is the correct email suffix
 	if email[len(email)-len(common.EmailSuffix):] == common.EmailSuffix {
 		userData := strings.Split(email, ".")
+
+		// Check that there is only one first name and one last name
 		if len(userData) != 3 {
 			return nil, errInvalidEmail
 		}
-		usernameLen := len(email) - len(common.EmailSuffix)
+
 		return &User{
 			UserID:       calcUserID(email),
 			Firstname:    userData[0],
 			Lastname:     strings.Split(userData[1], "@")[0],
-			Username:     email[0:usernameLen],
+			Username:     email[0 : len(email)-len(common.EmailSuffix)],
 			Email:        email,
+			Grade:        grade,
 			RegisterDate: time.Now(),
 		}, nil
 	}

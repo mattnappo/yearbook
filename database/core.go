@@ -45,11 +45,11 @@ func (db *Database) DeletePost(postID string) error {
 }
 
 // AddUser adds a new user to the database.
-func (db *Database) AddUser(email string) error {
+func (db *Database) AddUser(email string, grade models.Grade) error {
 	db.mux.Lock()
 	defer db.mux.Unlock()
 
-	user, err := models.NewUserFromEmail(email)
+	user, err := models.NewUser(email, grade)
 	if err != nil {
 		return err
 	}

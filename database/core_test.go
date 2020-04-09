@@ -8,13 +8,19 @@ import (
 	"github.com/xoreo/yearbook/models"
 )
 
-func genRandUser() *models.User {
+func genRandUser(grade ...models.Grade) *models.User {
+	var g models.Grade
+	if len(grade) == 1 {
+		g = grade[0]
+	}
+
 	r := rand.Intn(999) + 1
-	u, err := models.NewUserFromEmail(
+	u, err := models.NewUser(
 		fmt.Sprintf("first%d.last%d@mastersny.org", r, r),
+		g,
 	)
 	if err != nil {
-		panic(err)
+		panic(err) // Panic because panic is better here
 	}
 	return u
 }
@@ -26,7 +32,7 @@ func TestAddPost(t *testing.T) {
 		genRandUser(),
 		"I am a message",
 		[]string{"../data/img1.jpg", "../data/img2.jpg"},
-		genRandUser(),
+		genRandUser(models.Senior),
 	)
 	if err != nil {
 		t.Fatal(err)

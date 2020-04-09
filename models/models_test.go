@@ -2,8 +2,8 @@ package models
 
 import "testing"
 
-func TestNewUserFromEmail(t *testing.T) {
-	user, err := NewUserFromEmail("first.last@mastersny.org")
+func TestNewUser(t *testing.T) {
+	user, err := NewUser("first.last@mastersny.org", Freshman)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -12,7 +12,7 @@ func TestNewUserFromEmail(t *testing.T) {
 }
 
 func TestIsValidUser(t *testing.T) {
-	vUser, err := NewUserFromEmail("first.last@mastersny.org")
+	vUser, err := NewUser("first.last@mastersny.org", Freshman)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -20,9 +20,9 @@ func TestIsValidUser(t *testing.T) {
 }
 
 func TestNewPost(t *testing.T) {
-	sender, err := NewUserFromEmail("sen.der@mastersny.org")
-	recip1, err := NewUserFromEmail("recip.one@mastersny.org")
-	recip2, err := NewUserFromEmail("recip.two@mastersny.org")
+	sender, err := NewUser("sen.der@mastersny.org", Freshman)
+	recip1, err := NewUser("recip.one@mastersny.org", Senior)
+	recip2, err := NewUser("recip.two@mastersny.org", Senior)
 	if err != nil {
 		t.Fatal(err)
 	}

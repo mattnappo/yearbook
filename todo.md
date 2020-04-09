@@ -3,4 +3,4 @@
 2. Secure the size of [][]byte images 
 3. Remove data duplication in the post type (users are duplicated). Should Post.Recipients be an array of strings?
 4. Re-write the isValidUser func to use hash checking
-5. Add integer odering to the tables
+5. Encrypt the local password file
