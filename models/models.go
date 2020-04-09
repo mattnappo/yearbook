@@ -132,7 +132,9 @@ func NewPost(
 
 	timestamp := time.Now()
 	return &Post{
-		PostID:     crypto.Sha3String(sender.Email + timestamp.String()),
+		PostID: crypto.Sha3String(
+			sender.Email + timestamp.String() + message,
+		),
 		Timestamp:  timestamp,
 		Sender:     *sender,
 		Recipients: recipients,

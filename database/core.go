@@ -15,7 +15,7 @@ func (db *Database) AddPost(post *models.Post) error {
 
 // GetPost gets a post from the database.
 func (db *Database) GetPost(postID string) (models.Post, error) {
-	post := &models.Post{PostID: postID}
+	post := &models.Post{}
 	err := db.DB.Model(post).
 		Where("post.post_id = ?", postID).
 		Select()
@@ -72,8 +72,10 @@ func (db *Database) AddUser(email string, grade models.Grade) error {
 
 // GetUser gets a user from the database.
 func (db *Database) GetUser(userID string) (models.User, error) {
-	user := &models.User{UserID: userID}
-	err := db.DB.Select(user)
+	user := &models.User{}
+	err := db.DB.Model(user).
+		Where("user.user_id = ?", userID).
+		Select()
 	if err != nil {
 		return models.User{}, err
 	}

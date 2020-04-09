@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/xoreo/yearbook/models"
 )
 
 func genRandUser(grade ...models.Grade) *models.User {
+	rand.Seed(time.Now().UTC().UnixNano())
 	var g models.Grade
 	if len(grade) == 1 {
 		g = grade[0]
@@ -30,10 +32,11 @@ func TestAddPost(t *testing.T) {
 	defer db.Disconnect()
 	post, err := models.NewPost(
 		genRandUser(),
-		"I am a message",
+		"I am a messagess",
 		[]string{"../data/img1.jpg", "../data/img2.jpg"},
 		genRandUser(models.Senior),
 	)
+	fmt.Println(post)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +47,7 @@ func TestAddPost(t *testing.T) {
 }
 
 func TestGetPost(t *testing.T) {
-	pid := "522f46a76a8ed12824c10559d01a436994a3f5147d99a73e96f88245952ecc93"
+	pid := "f4a1414e255e65d52d124a685f441566900a96e220d7d691b8654669d9008107"
 	db := Connect(false)
 	defer db.Disconnect()
 
