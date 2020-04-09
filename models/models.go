@@ -16,27 +16,29 @@ var (
 	errInvalidEmail = errors.New("invalid email address")
 )
 
+type image []byte
+
 // User represents a user.
 type User struct {
-	ID           int64  `pg:",pk"`
-	UserID       string `pg:",notnull,unique"`
-	Firstname    string `pg:",notnull"`
-	Lastname     string `pg:",notnull"`
-	Username     string `pg:",notnull"`
-	Email        string `pg:",notnull"`
-	RegisterDate string `pg:",notnull"`
+	ID           int32     `pg:",pk"`
+	UserID       string    `pg:",notnull,unique"`
+	Firstname    string    `pg:",notnull"`
+	Lastname     string    `pg:",notnull"`
+	Username     string    `pg:",notnull"`
+	Email        string    `pg:",notnull"`
+	RegisterDate time.Time `pg:",notnull"`
 }
 
 // Post represents a post in the database.
 type Post struct {
-	ID         int64   `pg:",pk"`
-	PostID     string  `pg:",notnull,unique"`
-	Timestamp  string  `pg:",notnull"`
-	Sender     *User   `pg:",notnull"`
-	Recipients []*User `pg:",notnull,array"`
+	ID         int32     `pg:",pk"`
+	PostID     string    `pg:",notnull,unique"`
+	Timestamp  time.Time `pg:",notnull"`
+	Sender     User      `pg:",notnull"`
+	Recipients []*User   `pg:",notnull"`
 
-	Message string   `pg:",notnull"`
-	Images  [][]byte `pg:",notnull,array"`
+	Message string  `pg:",notnull"`
+	Images  []image `pg:",notnull,array"`
 }
 
 // NewUserFromEmail creates a *User given a valid email.
@@ -53,7 +55,7 @@ func NewUserFromEmail(email string) (*User, error) {
 			Lastname:     strings.Split(userData[1], "@")[0],
 			Username:     email[0:usernameLen],
 			Email:        email,
-			RegisterDate: time.Now().String(),
+			RegisterDate: time.Now(),
 		}, nil
 	}
 	return nil, errInvalidEmail
@@ -100,20 +102,20 @@ func NewPost(
 	}
 
 	// Load the images into a [][]byte
-	var images [][]byte
+	var images []image
 	for _, imagePath := range imagePaths {
-		image, err := ioutil.ReadFile(imagePath)
+		tImage, err := ioutil.ReadFile(imagePath)
 		if err != nil {
 			return nil, err
 		}
-		images = append(images, image)
+		images = append(images, image(tImage))
 	}
 
-	timestamp := time.Now().String()
+	timestamp := time.Now()
 	return &Post{
-		PostID:     crypto.Sha3String(sender.Email + timestamp),
+		PostID:     crypto.Sha3String(sender.Email + timestamp.String()),
 		Timestamp:  timestamp,
-		Sender:     sender,
+		Sender:     *sender,
 		Recipients: recipients,
 		Message:    message,
 		Images:     images,

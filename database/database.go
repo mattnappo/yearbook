@@ -59,8 +59,8 @@ func (db *Database) Disconnect() error {
 	return nil
 }
 
-// createSchema creates the database schema.
-func (db *Database) createSchema() error {
+// CreateSchema creates the database schema.
+func (db *Database) CreateSchema() error {
 	db.mux.Lock()
 	defer db.mux.Unlock()
 	for _, model := range []interface{}{
