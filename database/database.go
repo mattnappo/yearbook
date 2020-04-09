@@ -54,39 +54,6 @@ func (db *Database) Disconnect() error {
 	return nil
 }
 
-// AddPost adds a post to the database.
-func (db *Database) AddPost(post *models.Post) error {
-	if db.status != CONNECTED {
-		return errDisconnected
-	}
-	db.mux.Lock()
-	defer db.mux.Unlock()
-
-	err := db.DB.Insert(post)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// AddUser adds a new user to the database.
-func (db *Database) AddUser(email string) error { return nil }
-
-// GetPost gets a post from the database.
-func (db *Database) GetPost(postID string) error { return nil }
-
-// GetUser gets a user from the database.
-func (db *Database) GetUser(userID string) error { return nil }
-
-// GetAllPosts gets all posts from the database.
-func (db *Database) GetAllPosts() error { return nil }
-
-// GetAllUsers gets all users from the database.
-func (db *Database) GetAllUsers() error { return nil }
-
-// GetNPosts gets n posts from the database.
-func (db *Database) GetNPosts(n int) error { return nil }
-
 // createSchema creates the database schema.
 func (db *Database) createSchema() error {
 	db.mux.Lock()
