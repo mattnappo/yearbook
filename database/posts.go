@@ -15,18 +15,25 @@ func (db *Database) AddPost(post *models.Post) error {
 }
 
 // GetPost gets a post from the database.
-func (db *Database) GetPost(postID string) (*models.Post, error) {
+func (db *Database) GetPost(postID string) (models.Post, error) {
 	post := &models.Post{PostID: postID}
 	err := db.DB.Select(post)
 	if err != nil {
-		return nil, err
+		return models.Post{}, err
 	}
 
-	return post, nil
+	return *post, nil
 }
 
 // GetAllPosts gets all posts from the database.
-func (db *Database) GetAllPosts() error { return nil }
+func (db *Database) GetAllPosts() ([]models.Post, error) {
+	var posts []models.Post
+	err := db.DB.Model(&posts).Select()
+	if err != nil {
+		return nil, err
+	}
+	return posts, nil
+}
 
 // GetNPosts gets n posts from the database.
 func (db *Database) GetNPosts(n int) error { return nil }
