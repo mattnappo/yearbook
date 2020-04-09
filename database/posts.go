@@ -6,7 +6,6 @@ import "github.com/xoreo/yearbook/models"
 func (db *Database) AddPost(post *models.Post) error {
 	db.mux.Lock()
 	defer db.mux.Unlock()
-
 	err := db.DB.Insert(post)
 	if err != nil {
 		return err
@@ -40,5 +39,7 @@ func (db *Database) GetNPosts(n int) error { return nil }
 
 // DeletePost deletes a post from the database
 func (db *Database) DeletePost(postID string) error {
+	db.mux.Lock()
+	defer db.mux.Unlock()
 	return db.DB.Delete(&models.Post{PostID: postID})
 }

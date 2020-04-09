@@ -18,7 +18,8 @@ var (
 
 // User represents a user.
 type User struct {
-	ID           string `pg:",notnull"`
+	ID           int64  `pg:",pk"`
+	UserID       string `pg:",notnull,unique"`
 	Firstname    string `pg:",notnull"`
 	Lastname     string `pg:",notnull"`
 	Username     string `pg:",notnull"`
@@ -28,13 +29,13 @@ type User struct {
 
 // Post represents a post in the database.
 type Post struct {
-	PostID     string  `pg:",notnull"`
+	PostID     string  `pg:",notnull,unique"`
 	Timestamp  string  `pg:",notnull"`
 	Sender     *User   `pg:",notnull"`
-	Recipients []*User `pg:",notnull"`
+	Recipients []*User `pg:",notnull,array"`
 
 	Message string   `pg:",notnull"`
-	Images  [][]byte `pg:",notnull"`
+	Images  [][]byte `pg:",notnull,array"`
 }
 
 // NewUserFromEmail creates a *User given a valid email.
@@ -46,7 +47,7 @@ func NewUserFromEmail(email string) (*User, error) {
 		}
 		usernameLen := len(email) - len(common.EmailSuffix)
 		return &User{
-			ID:           calcUserID(email),
+			UserID:       calcUserID(email),
 			Firstname:    userData[0],
 			Lastname:     strings.Split(userData[1], "@")[0],
 			Username:     email[0:usernameLen],
