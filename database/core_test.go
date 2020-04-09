@@ -31,7 +31,10 @@ func TestAddPost(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	db.AddPost(post)
+	err = db.AddPost(post)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestGetPost(t *testing.T) {

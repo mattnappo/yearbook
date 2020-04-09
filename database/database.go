@@ -3,6 +3,7 @@ package database
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"sync"
 
 	"github.com/go-pg/pg/v9"
@@ -36,13 +37,24 @@ type Database struct {
 }
 
 // Connect connects to the database.
-func Connect() *Database {
-	fmt.Printf("Password: ")
-	pwd, _ := terminal.ReadPassword(0)
-	fmt.Printf("\n")
+func Connect(fromStdin bool) *Database {
+	var password []byte
+	if fromStdin { // Read password from stdin
+		fmt.Printf("Password: ")
+		password, _ = terminal.ReadPassword(0)
+		fmt.Printf("\n")
+	} else { // Read password from disk
+		password, err := ioutil.ReadFile(common.PasswordFile)
+		if err != nil {
+			panic(errors.New("could not read from password file"))
+		}
+		password = password
+	}
+
+	// Connect to db
 	db := pg.Connect(&pg.Options{
 		User:     "postgres",
-		Password: string(pwd),
+		Password: string(password),
 		Database: common.DatabaseName,
 	})
 	return &Database{db, CONNECTED, sync.Mutex{}}

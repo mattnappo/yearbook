@@ -15,4 +15,8 @@ const (
 
 	// DatabaseName is the name of the Postgres database.
 	DatabaseName = "ybtests"
+
+	// PasswordFile is the location of the file containing the Postgres
+	// password.
+	PasswordFile = "../password.pwd"
 )
