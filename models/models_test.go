@@ -18,8 +18,8 @@ func TestIsValidUser(t *testing.T) {
 	}
 	t.Log(vUser.isValid())
 
-	ivUser, _ := NewUserFromEmail("first.last@gmail.com")
-	t.Log(ivUser.isValid())
+	// ivUser, _ := NewUserFromEmail("first.last@gmail.com")
+	// t.Log(ivUser.isValid())
 }
 
 func TestNewPost(t *testing.T) {
