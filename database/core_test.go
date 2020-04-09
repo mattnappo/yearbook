@@ -10,15 +10,14 @@ import (
 )
 
 func genRandUser(grade ...models.Grade) *models.User {
-	rand.Seed(time.Now().UTC().UnixNano())
 	var g models.Grade
 	if len(grade) == 1 {
 		g = grade[0]
 	}
 
-	r := rand.Intn(999) + 1
+	r := fmt.Sprintf("%f", rand.Float64())[2:]
 	u, err := models.NewUser(
-		fmt.Sprintf("first%d.last%d@mastersny.org", r, r),
+		fmt.Sprintf("first%s.last%s@mastersny.org", r, r),
 		g,
 	)
 	if err != nil {
@@ -28,11 +27,12 @@ func genRandUser(grade ...models.Grade) *models.User {
 }
 
 func TestAddPost(t *testing.T) {
+	rand.Seed(time.Now().UnixNano())
 	db := Connect(false)
 	defer db.Disconnect()
 	post, err := models.NewPost(
 		genRandUser(),
-		"I am a messagess",
+		"I am a messagessadsd",
 		[]string{"../data/img1.jpg", "../data/img2.jpg"},
 		genRandUser(models.Senior),
 	)
@@ -47,7 +47,7 @@ func TestAddPost(t *testing.T) {
 }
 
 func TestGetPost(t *testing.T) {
-	pid := "f4a1414e255e65d52d124a685f441566900a96e220d7d691b8654669d9008107"
+	pid := "f4f470a193e2b94b2a22b4484693692dc8c4a9cbc3a7c06a1aa866264b71362e"
 	db := Connect(false)
 	defer db.Disconnect()
 
