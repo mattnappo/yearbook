@@ -8,11 +8,11 @@ import (
 	"golang.org/x/crypto/sha3"
 )
 
-// HashLength is the standardized length of a hash.
-const HashLength = 32
+// hashLength is the standardized length of a hash.
+const hashLength = 32
 
 // Hash represents the streamlined hash type to be used.
-type Hash [HashLength]byte
+type Hash [hashLength]byte
 
 // NewHash constructs a new hash given a hash, API so it returns an error.
 func NewHash(b []byte) (Hash, error) {
@@ -21,12 +21,12 @@ func NewHash(b []byte) (Hash, error) {
 
 	// Check the crop side
 	if len(b) > len(hash) {
-		bCropped = bCropped[len(bCropped)-HashLength:] // Crop the hash
+		bCropped = bCropped[len(bCropped)-hashLength:] // Crop the hash
 	}
 
 	// Copy the source
 	copy(
-		hash[HashLength-len(bCropped):],
+		hash[hashLength-len(bCropped):],
 		bCropped,
 	)
 
@@ -40,12 +40,12 @@ func newHash(b []byte) Hash {
 
 	// Check the crop side
 	if len(b) > len(hash) {
-		bCropped = bCropped[len(bCropped)-HashLength:] // Crop the hash
+		bCropped = bCropped[len(bCropped)-hashLength:] // Crop the hash
 	}
 
 	// Copy the source
 	copy(
-		hash[HashLength-len(bCropped):],
+		hash[hashLength-len(bCropped):],
 		bCropped,
 	)
 
@@ -59,42 +59,19 @@ func Sha3(b []byte) Hash {
 	return newHash(hash.Sum(nil))
 }
 
-// Sha3String hashes a given message via sha3 and encodes the hashed message to a hex string.
-func Sha3String(b []byte) string {
-	b = Sha3(b).Bytes()
-	return hex.EncodeToString(b) // Convert to a hex string
-}
-
-// HashFromString returns a Hash type given a hex string.
-func HashFromString(s string) (Hash, error) {
-	b, err := hex.DecodeString(s)
-	if err != nil {
-		return Hash{}, err
-	}
-	return newHash(b), nil
-}
-
-// IsNil checks if a given hash is nil.
-func (hash Hash) IsNil() bool {
-	nilBytes := 0 // Init nil bytes buffer
-
-	// Iterate through the hash, checking for nil bytes
-	for _, byteVal := range hash[:] {
-		if byteVal == 0 {
-			nilBytes++
-		}
-	}
-
-	return nilBytes == HashLength
-}
-
-// Bytes converts a given hash to a byte array.
-func (hash Hash) Bytes() []byte {
-	return hash[:] // Return byte array value
+// Sha3String hashes a given message via sha3 and encodes the hashed
+// message to a hex string.
+func Sha3String(s string) string {
+	return Sha3([]byte(s)).String()
 }
 
 // String returns the hash as a hex string.
 func (hash Hash) String() string {
 	b := hash.Bytes()
 	return hex.EncodeToString(b) // Convert to a hex string
+}
+
+// Bytes returns the bytes of the hash.
+func (hash Hash) Bytes() string {
+	return hash[:]
 }

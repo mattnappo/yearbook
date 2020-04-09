@@ -1,7 +1,10 @@
 package models
 
 import (
+	"encoding/json"
 	"errors"
+	"github.com/xoreo/yearbook/common"
+	"github.com/xoreo/yearbook/crypto"
 	"io/ioutil"
 	"strings"
 	"time"
@@ -33,13 +36,14 @@ type Post struct {
 
 // NewUserFromEmail creates a *User given a valid email.
 func NewUserFromEmail(email string) (*User, error) {
-	if email[len(email)-len(emailPrefix):] == emailPrefix {
+	if email[len(email)-len(common.EmailSuffix):] == common.EmailSuffix {
 		userData := strings.Split(email, ".")
+		usernameLen := len(email) - len(common.EmailSuffix)
 		return &User{
-			ID:           "hash of email",
+			ID:           crypto.Sha3String(email),
 			Firstname:    userData[0],
-			Lastname:     userData[1],
-			Username:     email[0 : len(email)-len(emailPrefix)],
+			Lastname:     strings.Split(userData[1], "@")[0],
+			Username:     email[0:usernameLen],
 			Email:        email,
 			RegisterDate: time.Now().String(),
 		}, nil
@@ -56,17 +60,31 @@ func NewPost(
 ) (*Post, error) {
 	// Check that no data is nil
 	if sender == nil || len(recipients) > common.MaxRecipients ||
-		len(recipients) <= 0 || message == "" || len(images) > common.MaxImages {
+		len(recipients) <= 0 || message == "" ||
+		len(imagePaths) > common.MaxImages {
 		return nil, errors.New("cannot supply nil data to construct post")
 	}
 
 	// Load the images into a [][]byte
 	var images [][]byte
-	for _, imagePath := range images {
+	for _, imagePath := range imagePaths {
 		image, err := ioutil.ReadFile(imagePath)
 		if err != nil {
 			return nil, err
 		}
 		images = append(images, image)
 	}
+	return nil, nil
+}
+
+// String marshals auser to a string.
+func (user *User) String() string {
+	json, _ := json.MarshalIndent(*user, " ", "  ")
+	return string(json)
+}
+
+// String marshals a post to a string.
+func (post *Post) String() string {
+	json, _ := json.MarshalIndent(*post, " ", "  ")
+	return string(json)
 }

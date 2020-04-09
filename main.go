@@ -10,46 +10,6 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-// PostID is the main form of identification for a post.
-type PostID string
-
-// User represents a user.
-type User struct {
-	ID           string `pg:",notnull"`
-	Firstname    string `pg:",notnull"`
-	Lastname     string `pg:",notnull"`
-	Username     string `pg:",notnull"`
-	Email        string `pg:",notnull"`
-	RegisterDate string `pg:",notnull"`
-}
-
-// NewUserFromEmail creates a *User given a valid email.
-func NewUserFromEmail(email string) (*User, error) {
-	if email[len(email)-len(emailPrefix):] == emailPrefix {
-		userData := strings.Split(email, ".")
-		return &User{
-			ID:           "hash of email",
-			Firstname:    userData[0],
-			Lastname:     userData[1],
-			Username:     email[0 : len(email)-len(emailPrefix)],
-			Email:        email,
-			RegisterDate: time.Now().String(),
-		}, nil
-	}
-	return nil, errors.New("invalid email address")
-}
-
-// Post represents a post in the database.
-type Post struct {
-	PostID     PostID  `pg:",notnull"`
-	Timestamp  string  `pg:",notnull"`
-	Sender     *User   `pg:",notnull"`
-	Recipients []*User `pg:",notnull"`
-
-	Message string   `pg:",notnull"`
-	Images  [][]byte `pg:",notnull"`
-}
-
 // Connect connects to the database.
 func Connect() *pg.DB {
 	fmt.Printf("Password: ")
@@ -95,7 +55,7 @@ func Test(shouldCreateSchema bool) error {
 	return nil
 }
 
-// createSchema
+// createSchema creates the database schema.
 func createSchema(db *pg.DB) error {
 	for _, model := range []interface{}{(*User)(nil), (*Post)(nil)} {
 		err := db.CreateTable(model, nil)
