@@ -16,7 +16,9 @@ func (db *Database) AddPost(post *models.Post) error {
 // GetPost gets a post from the database.
 func (db *Database) GetPost(postID string) (models.Post, error) {
 	post := &models.Post{PostID: postID}
-	err := db.DB.Select(post)
+	err := db.DB.Model(post).
+		Where("post.post_id = ?", postID).
+		Select()
 	if err != nil {
 		return models.Post{}, err
 	}

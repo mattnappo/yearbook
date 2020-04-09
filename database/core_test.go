@@ -44,7 +44,15 @@ func TestAddPost(t *testing.T) {
 }
 
 func TestGetPost(t *testing.T) {
+	pid := "522f46a76a8ed12824c10559d01a436994a3f5147d99a73e96f88245952ecc93"
+	db := Connect(false)
+	defer db.Disconnect()
 
+	post, err := db.GetPost(pid)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(post)
 }
 
 func TestGetAllPosts(t *testing.T) {

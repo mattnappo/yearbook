@@ -39,5 +39,4 @@ func TestNewPost(t *testing.T) {
 	}
 
 	t.Log(post)
-
 }

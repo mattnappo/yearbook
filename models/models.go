@@ -34,13 +34,13 @@ const (
 
 // User represents a user.
 type User struct {
-	ID           int32  `pg:",pk"`
-	UserID       string `pg:",notnull,unique"`
-	Firstname    string `pg:",notnull"`
-	Lastname     string `pg:",notnull"`
-	Username     string `pg:",notnull"`
-	Email        string `pg:",notnull"`
-	Grade        Grade
+	ID           int32     `pg:",pk"`
+	UserID       string    `pg:",notnull,unique"`
+	Firstname    string    `pg:",notnull"`
+	Lastname     string    `pg:",notnull"`
+	Username     string    `pg:",notnull"`
+	Email        string    `pg:",notnull"`
+	Grade        Grade     `pg:",notnull"`
 	RegisterDate time.Time `pg:",notnull"`
 }
 
@@ -57,7 +57,7 @@ type Post struct {
 }
 
 // NewUser creates a *User given a valid email and grade.
-func NewUser(email string, grade grade) (*User, error) {
+func NewUser(email string, grade Grade) (*User, error) {
 	// Check that the last part of the email is the correct email suffix
 	if email[len(email)-len(common.EmailSuffix):] == common.EmailSuffix {
 		userData := strings.Split(email, ".")
