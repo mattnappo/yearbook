@@ -9,4 +9,7 @@ const (
 
 	// MaxImages is the maximum amount of images on one post.
 	MaxImages = 5
+
+	// MaxMessageLength is the maximum amount of characters in a post message.
+	MaxMessageLength = 2000
 )
