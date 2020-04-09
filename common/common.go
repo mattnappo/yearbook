@@ -12,4 +12,7 @@ const (
 
 	// MaxMessageLength is the maximum amount of characters in a post message.
 	MaxMessageLength = 2000
+
+	// DatabaseName is the name of the Postgres database.
+	DatabaseName = "ybtests"
 )
