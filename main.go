@@ -3,17 +3,17 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/go-pg/pg/v9"
-	"github.com/go-pg/pg/v9/orm"
-	"golang.org/x/crypto/ssh/terminal"
 	"strings"
 	"time"
+
+	"github.com/go-pg/pg/v9"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
-const emailPrefix = "@mastersny.org"
-
+// PostID is the main form of identification for a post.
 type PostID string
 
+// User represents a user.
 type User struct {
 	ID           string `pg:",notnull"`
 	Firstname    string `pg:",notnull"`
@@ -23,6 +23,7 @@ type User struct {
 	RegisterDate string `pg:",notnull"`
 }
 
+// NewUserFromEmail creates a *User given a valid email.
 func NewUserFromEmail(email string) (*User, error) {
 	if email[len(email)-len(emailPrefix):] == emailPrefix {
 		userData := strings.Split(email, ".")
@@ -38,6 +39,7 @@ func NewUserFromEmail(email string) (*User, error) {
 	return nil, errors.New("invalid email address")
 }
 
+// Post represents a post in the database.
 type Post struct {
 	PostID     PostID  `pg:",notnull"`
 	Timestamp  string  `pg:",notnull"`
@@ -48,6 +50,7 @@ type Post struct {
 	Images  [][]byte `pg:",notnull"`
 }
 
+// Connect connects to the database.
 func Connect() *pg.DB {
 	fmt.Printf("Password: ")
 	pwd, _ := terminal.ReadPassword(0)
@@ -92,11 +95,10 @@ func Test(shouldCreateSchema bool) error {
 	return nil
 }
 
+// createSchema
 func createSchema(db *pg.DB) error {
 	for _, model := range []interface{}{(*User)(nil), (*Post)(nil)} {
-		err := db.CreateTable(model, &orm.CreateTableOptions{
-			Temp: false,
-		})
+		err := db.CreateTable(model, nil)
 		if err != nil {
 			return err
 		}
