@@ -44,11 +44,11 @@ func Connect(fromStdin bool) *Database {
 		password, _ = terminal.ReadPassword(0)
 		fmt.Printf("\n")
 	} else { // Read password from disk
-		password, err := ioutil.ReadFile(common.PasswordFile)
+		pwd, err := ioutil.ReadFile(common.PasswordFile)
 		if err != nil {
 			panic(errors.New("could not read from password file"))
 		}
-		password = password
+		password = pwd
 	}
 
 	// Connect to db

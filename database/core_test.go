@@ -20,7 +20,7 @@ func genRandUser() *models.User {
 }
 
 func TestAddPost(t *testing.T) {
-	db := Connect()
+	db := Connect(false)
 	defer db.Disconnect()
 	post, err := models.NewPost(
 		genRandUser(),
