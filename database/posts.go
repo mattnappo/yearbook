@@ -39,4 +39,6 @@ func (db *Database) GetAllPosts() ([]models.Post, error) {
 func (db *Database) GetNPosts(n int) error { return nil }
 
 // DeletePost deletes a post from the database
-func (db *Database) DeletePost(postID string) error { return nil }
+func (db *Database) DeletePost(postID string) error {
+	return db.DB.Delete(&models.Post{PostID: postID})
+}
