@@ -2,11 +2,16 @@
 package api
 
 import (
+	"fmt"
+	"os"
 	"path"
+	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/juju/loggo"
+	"github.com/juju/loggo/loggocolor"
 	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/database"
 )
@@ -22,20 +27,23 @@ type API struct {
 }
 
 // newAPI constructs a new API struct.
-func newAPI(port int64) *API {
+func newAPI(port int64) (*API, error) {
 	api := &API{
 		router:   gin.New(),
-		log:      common.NewLogger("api"),
 		database: nil,
 
 		root: common.DefaultAPIRoot,
 		port: port,
 	}
 
+	err := api.initLogger()
+	if err != nil {
+		return nil, err
+	}
 	api.setupRoutes()
 
 	api.log.Infof("API server initialization complete")
-	return api
+	return api, nil
 }
 
 // setupRoutes initializes the necessary routes.
@@ -57,7 +65,10 @@ func (api *API) setupRoutes() {
 
 // StartAPIServer starts the API server.
 func StartAPIServer(port int64) error {
-	api := newAPI(port)
+	api, err := newAPI(port)
+	if err != nil {
+		return err
+	}
 
 	api.database = database.Connect(false)
 	defer api.database.Disconnect()
@@ -65,4 +76,38 @@ func StartAPIServer(port int64) error {
 	api.log.Infof("API server to listen on port %d", port)
 
 	return api.router.Run("0.0.0.0:" + strconv.FormatInt(port, 10))
+}
+
+// initLogger initializes the api's logger.
+func (api *API) initLogger() error {
+	logger := loggo.GetLogger("api")
+	err := common.CreateDirIfDoesNotExist(filepath.FromSlash(common.LogsDir))
+	if err != nil {
+		return err
+	}
+
+	// Create the log file
+	logFile, err := os.OpenFile(filepath.FromSlash(fmt.Sprintf(
+		"%s/logs_%s.txt", common.LogsDir,
+		time.Now().Format("2006-01-02_15-04-05"))),
+		os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		return err
+	}
+
+	// Enable colors
+	_, err = loggo.ReplaceDefaultWriter(loggocolor.NewWriter(os.Stderr))
+	if err != nil {
+		return err
+	}
+
+	// Register file writer
+	err = loggo.RegisterWriter("logs", loggo.NewSimpleWriter(logFile, loggo.DefaultFormatter))
+	if err != nil {
+		return err
+	}
+
+	api.log = &logger // Get a pointer to the logger
+
+	return nil
 }

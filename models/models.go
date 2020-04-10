@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -44,7 +43,7 @@ type User struct {
 	Firstname    string    `pg:",notnull"`
 	Lastname     string    `pg:",notnull"`
 	Email        string    `pg:",notnull,unique"`
-	Grade        string    `pg:","`
+	Grade        Grade     `pg:",use_zero"`
 	RegisterDate time.Time `pg:",notnull"`
 }
 
@@ -73,7 +72,7 @@ func NewUser(email string, grade Grade) (*User, error) {
 		Firstname:    username.firstname(),
 		Lastname:     username.lastname(),
 		Email:        username.email(),
-		Grade:        strconv.Itoa(int(grade)),
+		Grade:        grade,
 		RegisterDate: time.Now(),
 	}, nil
 }

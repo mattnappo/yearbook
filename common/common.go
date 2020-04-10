@@ -2,9 +2,7 @@ package common
 
 import (
 	"os"
-
-	"github.com/juju/loggo"
-	"github.com/juju/loggo/loggocolor"
+	"path/filepath"
 )
 
 const (
@@ -32,14 +30,19 @@ const (
 
 	// DefaultAPIRoot is the default API root.
 	DefaultAPIRoot = "/api"
+
+	// LogsDir is the location where all log files are stored.
+	LogsDir = "./data/logs"
 )
 
-// NewLogger will create a new default loggo.Logger.
-func NewLogger(context string) *loggo.Logger {
-	// Create and setup a new logger
-	logger := loggo.GetLogger(context)
-	logger.SetLogLevel(loggo.DEBUG)
-	loggo.ReplaceDefaultWriter(loggocolor.NewWriter(os.Stderr)) // Add colors
-
-	return &logger
+// CreateDirIfDoesNotExist creates a directory if it does not already exist.
+func CreateDirIfDoesNotExist(dir string) error {
+	dir = filepath.FromSlash(dir)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.MkdirAll(dir, 0755)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
