@@ -4,18 +4,27 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/mux"
+	"github.com/juju/loggo"
 	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/models"
 )
 
-func createPost(w http.ResponseWriter, r *http.Request) {
+func (api *API) createPost(ctx *gin.Context) {
 	logger := common.NewLogger("api.createPost")
-	w.Header().Set("Content-Type", "application/json")
 
 	// Decode the post request
 	var request createPostRequest
-	json.NewDecoder(r.Body).Decode(&request)
+	err := ctx.ShouldBindJSON(&request)
+	if err != nil {
+		api.log.Logf(loggo.ERROR, err.Error())
+		ctx.JSON(
+			http.StatusInternalServerError,
+			newGenericResponse("", err.Error()),
+		)
+		return
+	}
 
 	logger.Infof("request to create post")
 
@@ -38,7 +47,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 }
 
 // getPost gets a post.
-func getPost(w http.ResponseWriter, r *http.Request) {
+func (api *API) getPost(ctx *gin.Context) {
 	logger := common.NewLogger("api.GetServer")
 	w.Header().Set("Content-Type", "application/json")
 
@@ -61,43 +70,43 @@ func getPost(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(res)
 }
 
-func getPosts(w http.ResponseWriter, r *http.Request) {
+func (api *API) getPosts(ctx *gin.Context) {
 	logger := common.NewLogger("api.getPosts")
 	// Write the response to the server
 	json.NewEncoder(w).Encode(res)
 }
 
-func getnPosts(w http.ResponseWriter, r *http.Request) {
+func (api *API) getnPosts(ctx *gin.Context) {
 	logger := common.NewLogger("api.getnPosts")
 	// Write the response to the server
 	json.NewEncoder(w).Encode(res)
 }
 
-func deletePost(w http.ResponseWriter, r *http.Request) {
+func (api *API) deletePost(ctx *gin.Context) {
 	logger := common.NewLogger("api.deletePost")
 	// Write the response to the server
 	json.NewEncoder(w).Encode(res)
 }
 
-func createUser(w http.ResponseWriter, r *http.Request) {
+func (api *API) createUser(ctx *gin.Context) {
 	logger := common.NewLogger("api.createUser")
 	// Write the response to the server
 	json.NewEncoder(w).Encode(res)
 }
 
-func getUser(w http.ResponseWriter, r *http.Request) {
+func (api *API) getUser(ctx *gin.Context) {
 	logger := common.NewLogger("api.getUser")
 	// Write the response to the server
 	json.NewEncoder(w).Encode(res)
 }
 
-func getUsers(w http.ResponseWriter, r *http.Request) {
+func (api *API) getUsers(ctx *gin.Context) {
 	logger := common.NewLogger("api.getUsers")
 	// Write the response to the server
 	json.NewEncoder(w).Encode(res)
 }
 
-func deleteUser(w http.ResponseWriter, r *http.Request) {
+func (api *API) deleteUser(ctx *gin.Context) {
 	logger := common.NewLogger("api.deleteUser")
 	// Write the response to the server
 	json.NewEncoder(w).Encode(res)

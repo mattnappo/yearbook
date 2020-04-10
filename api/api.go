@@ -2,11 +2,10 @@
 package api
 
 import (
-	"net/http"
 	"path"
 	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/juju/loggo"
 	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/database"
@@ -14,18 +13,18 @@ import (
 
 // API contains the API layer.
 type API struct {
-	router   *mux.Router
+	router   *gin.Engine
 	database *database.Database
 	log      *loggo.Logger
 
 	root string
-	port int
+	port int64
 }
 
 // newAPI constructs a new API struct.
-func newAPI(port int) *API {
+func newAPI(port int64) *API {
 	api := &API{
-		router:   mux.NewRouter(),
+		router:   gin.New(),
 		log:      common.NewLogger("api"),
 		database: nil,
 
@@ -42,36 +41,28 @@ func newAPI(port int) *API {
 // setupRoutes initializes the necessary routes.
 func (api *API) setupRoutes() {
 	// Oh boi do I need to clean up this bad boi
-	api.router.HandleFunc(path.Join(api.root, "createPost"), createPost).
-		Methods("POST")
-	api.router.HandleFunc(path.Join(api.root, "getPost/{id}"), getPost).
-		Methods("GET")
-	api.router.HandleFunc(path.Join(api.root, "getPosts"), getPosts).
-		Methods("GET")
-	api.router.HandleFunc(path.Join(api.root, "getnPosts/{n}"), getnPosts).
-		Methods("GET")
-	api.router.HandleFunc(path.Join(api.root, "deletePost/{id}"), deletePost).
-		Methods("DELETE")
+	api.router.POST(path.Join(api.root, "createPost"), api.createPost)
+	api.router.GET(path.Join(api.root, "getPost/:id"), api.getPost)
+	api.router.GET(path.Join(api.root, "getPosts"), api.getPosts)
+	api.router.GET(path.Join(api.root, "getnPosts/:n"), api.getnPosts)
+	api.router.DELETE(path.Join(api.root, "deletePost/:id"), api.deletePost)
 
-	api.router.HandleFunc(path.Join(api.root, "createUser"), createUser).
-		Methods("POST")
-	api.router.HandleFunc(path.Join(api.root, "getUser/{id}"), getUser).
-		Methods("GET")
-	api.router.HandleFunc(path.Join(api.root, "getUsers"), getUsers).
-		Methods("GET")
-	api.router.HandleFunc(path.Join(api.root, "deleteUser/{id}"), deleteUser).
-		Methods("DELETE")
+	api.router.POST(path.Join(api.root, "createUser"), api.createUser)
+	api.router.GET(path.Join(api.root, "getUser/:id"), api.getUser)
+	api.router.GET(path.Join(api.root, "getUsers"), api.getUsers)
+	api.router.DELETE(path.Join(api.root, "deleteUser/:id"), api.deleteUser)
 
 	api.log.Infof("initialized API server routes")
 }
 
 // StartAPIServer starts the API server.
-func StartAPIServer(port int) error {
+func StartAPIServer(port int64) error {
 	api := newAPI(port)
 
 	api.database = database.Connect(false)
 	defer api.database.Disconnect()
 
 	api.log.Infof("API server to listen on port %d", port)
-	return http.ListenAndServe(":"+strconv.Itoa(api.port), api.router)
+
+	return api.router.Run("0.0.0.0:" + strconv.FormatInt(port, 10))
 }
