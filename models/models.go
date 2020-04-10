@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -40,10 +41,10 @@ type User struct {
 	ID       int32    `pg:",pk"`
 	Username Username `pg:",notnull,unique"`
 
-	Firstname    string `pg:",notnull"`
-	Lastname     string `pg:",notnull"`
-	Email        string `pg:",notnull,unique"`
-	Grade        Grade
+	Firstname    string    `pg:",notnull"`
+	Lastname     string    `pg:",notnull"`
+	Email        string    `pg:",notnull,unique"`
+	Grade        string    `pg:","`
 	RegisterDate time.Time `pg:",notnull"`
 }
 
@@ -57,7 +58,7 @@ type Post struct {
 	Recipients []Username `pg:",notnull"`
 
 	Message string  `pg:",notnull"`
-	Images  []image `pg:",notnull,array"`
+	Images  []image `pg:",array"`
 }
 
 // NewUser creates a *User given a valid email and grade.
@@ -72,7 +73,7 @@ func NewUser(email string, grade Grade) (*User, error) {
 		Firstname:    username.firstname(),
 		Lastname:     username.lastname(),
 		Email:        username.email(),
-		Grade:        grade,
+		Grade:        strconv.Itoa(int(grade)),
 		RegisterDate: time.Now(),
 	}, nil
 }
@@ -133,8 +134,9 @@ func NewPost(
 // UsernameFromEmail constructs a username given an email.
 func UsernameFromEmail(email string) (Username, error) {
 	// Check that the email is not too long
-	if len(email) > common.MaxEmailLength {
-		return Username(""), errors.New("email is too long")
+	if len(email) > common.MaxEmailLength || len(email) <=
+		len(common.EmailSuffix) {
+		return Username(""), errors.New("email is too long or too short")
 	}
 
 	// Check that the email suffix is at the end and that there is only one first
@@ -144,7 +146,7 @@ func UsernameFromEmail(email string) (Username, error) {
 		return Username(""), errInvalidEmail
 	}
 
-	// Return firstname.lastname
+	// Return firstname.lastname as a Username type
 	return Username(email[0 : len(email)-len(common.EmailSuffix)]), nil
 }
 

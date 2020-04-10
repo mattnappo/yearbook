@@ -98,7 +98,7 @@ func (api *API) getnPosts(ctx *gin.Context) {
 		return
 	}
 
-	api.log.Infof("got %d posts", n)
+	api.log.Infof("got %d posts", nInt)
 	ctx.JSON(http.StatusOK, gr(posts))
 }
 
