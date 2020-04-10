@@ -35,7 +35,7 @@ func (api *API) createPost(ctx *gin.Context) {
 			newGenericResponse("", err.Error()),
 		)
 	}
-	api.log.Debugf("constructed new post %s", post.PostID)
+	api.log.Debugf("constructed new post \n%v", post)
 
 	// Add it to the database
 	err = api.database.AddPost(post)
@@ -53,41 +53,25 @@ func (api *API) createPost(ctx *gin.Context) {
 }
 
 // getPost gets a post.
-func (api *API) getPost(ctx *gin.Context) {
-
-}
+func (api *API) getPost(ctx *gin.Context) {}
 
 // getPosts gets all posts.
-func (api *API) getPosts(ctx *gin.Context) {
-
-}
+func (api *API) getPosts(ctx *gin.Context) {}
 
 // getnPosts gets n posts.
-func (api *API) getnPosts(ctx *gin.Context) {
-
-}
+func (api *API) getnPosts(ctx *gin.Context) {}
 
 // deletePost deletes a post.
-func (api *API) deletePost(ctx *gin.Context) {
-
-}
+func (api *API) deletePost(ctx *gin.Context) {}
 
 // createUser creates a user.
-func (api *API) createUser(ctx *gin.Context) {
-
-}
+func (api *API) createUser(ctx *gin.Context) {}
 
 // getUser gets a user.
-func (api *API) getUser(ctx *gin.Context) {
-
-}
+func (api *API) getUser(ctx *gin.Context) {}
 
 // getUsers gets all users.
-func (api *API) getUsers(ctx *gin.Context) {
-
-}
+func (api *API) getUsers(ctx *gin.Context) {}
 
 // deleteUser deletes a user.
-func (api *API) deleteUser(ctx *gin.Context) {
-
-}
+func (api *API) deleteUser(ctx *gin.Context) {}

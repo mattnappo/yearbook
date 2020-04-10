@@ -28,7 +28,7 @@ const (
 
 	// PasswordFile is the location of the file containing the Postgres
 	// password.
-	PasswordFile = "../password.pwd"
+	PasswordFile = "./password.pwd"
 
 	// DefaultAPIRoot is the default API root.
 	DefaultAPIRoot = "/api"

@@ -118,15 +118,14 @@ func NewPost(
 		byteImages = append(byteImages, image(byteImage))
 	}
 
-	timestamp := time.Now()
 	post := &Post{
-		Timestamp:  timestamp,
 		Sender:     sender,
 		Recipients: recipients,
 		Message:    message,
 		Images:     byteImages,
 	}
 	post.PostID = crypto.Sha3String(post.String())
+	post.Timestamp = time.Now()
 	return post, nil
 
 }
