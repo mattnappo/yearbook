@@ -4,8 +4,8 @@ import "github.com/xoreo/yearbook/models"
 
 // AddPost adds a post to the database.
 func (db *Database) AddPost(post *models.Post) error {
-	db.mux.Lock()
-	defer db.mux.Unlock()
+	// db.mux.Lock()
+	// defer db.mux.Unlock()
 	err := db.DB.Insert(post)
 	if err != nil {
 		return err

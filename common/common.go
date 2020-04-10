@@ -14,9 +14,9 @@ const (
 	MaxMessageLength = 2000
 
 	// DatabaseName is the name of the Postgres database.
-	DatabaseName = "ybtests"
+	DatabaseName = "new_tests"
 
 	// PasswordFile is the location of the file containing the Postgres
 	// password.
-	PasswordFile = "../password.pwd"
+	PasswordFile = "./password.pwd"
 )
