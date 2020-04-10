@@ -9,23 +9,14 @@ import (
 	"github.com/xoreo/yearbook/models"
 )
 
-func genRandUser(grade ...models.Grade) *models.User {
-	var g models.Grade
-	if len(grade) == 1 {
-		g = grade[0]
-	} else {
-		g = models.Freshman
-	}
-
+func genRandUser() string {
 	r := fmt.Sprintf("%f", rand.Float64())[2:]
-	u, err := models.NewUser(
-		fmt.Sprintf("first%s.last%s@mastersny.org", r, r),
-		g,
-	)
-	if err != nil {
-		panic(err) // Panic because panic is better here
-	}
-	return u
+	return fmt.Sprintf("first%s.last%s", r, r)
+}
+
+func genRandEmail() string {
+	r := fmt.Sprintf("%f", rand.Float64())[2:]
+	return fmt.Sprintf("first%s.last%s@mastersny.org", r, r)
 }
 
 func TestAddPost(t *testing.T) {
@@ -35,9 +26,9 @@ func TestAddPost(t *testing.T) {
 
 	post, err := models.NewPost(
 		genRandUser(),
-		"I am a messagessadsd",
-		[]string{"../data/img1.jpg", "../data/img2.jpg"},
-		genRandUser(models.Senior),
+		"I am a message",
+		[]string{"dW5pcXVlIGltYWdlIGRhdGEgb25l", "dW5pcXVlIGltYWdlIGRhdGEgdHdv"},
+		[]string{genRandUser()},
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -49,7 +40,7 @@ func TestAddPost(t *testing.T) {
 }
 
 func TestGetPost(t *testing.T) {
-	pid := "813ccc6451537315143363e69c9cf936445c2cb80a96fa0a06e0649e57877272"
+	pid := "c596d281587fa801d1329558f39f9792a9a96ca9bf75f18296a8172b46393403"
 	db := Connect(false)
 	defer db.Disconnect()
 
@@ -87,7 +78,7 @@ func TestDeletePost(t *testing.T) {
 	db := Connect(false)
 	defer db.Disconnect()
 
-	uid := "813ccc6451537315143363e69c9cf936445c2cb80a96fa0a06e0649e57877272"
+	uid := "c596d281587fa801d1329558f39f9792a9a96ca9bf75f18296a8172b46393403"
 	err := db.DeletePost(uid)
 	if err != nil {
 		t.Fatal(err)
@@ -98,10 +89,7 @@ func TestAddUser(t *testing.T) {
 	db := Connect(false)
 	defer db.Disconnect()
 
-	u := genRandUser()
-	t.Log(u)
-
-	err := db.AddUser(u.Email, models.Freshman)
+	err := db.AddUser(genRandEmail(), models.Freshman)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -111,7 +99,7 @@ func TestGetUser(t *testing.T) {
 	db := Connect(false)
 	defer db.Disconnect()
 
-	uid := "5999d445bb37c4282cd7c75fce5d954fe83d060d6a4c9d70b51cb00f89e3edb6"
+	uid := "first252744.last252744"
 	u, err := db.GetUser(uid)
 	if err != nil {
 		t.Fatal(err)
@@ -135,7 +123,7 @@ func TestDeleteUser(t *testing.T) {
 	db := Connect(false)
 	defer db.Disconnect()
 
-	uid := "5999d445bb37c4282cd7c75fce5d954fe83d060d6a4c9d70b51cb00f89e3edb6"
+	uid := "first252744.last252744"
 	err := db.DeleteUser(uid)
 	if err != nil {
 		t.Fatal(err)

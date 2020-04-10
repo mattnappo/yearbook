@@ -15,7 +15,7 @@ func TestNewPost(t *testing.T) {
 	post, err := NewPost(
 		"sen.der",
 		"Hi, this is a test message!",
-		[][]byte{[]byte("image data one"), []byte("image data two")},
+		[]string{"dW5pcXVlIGltYWdlIGRhdGEgb25l", "dW5pcXVlIGltYWdlIGRhdGEgdHdv"},
 		[]string{"recip.one", "recip.two"},
 	)
 

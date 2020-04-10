@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -80,7 +81,7 @@ func NewUser(email string, grade Grade) (*User, error) {
 func NewPost(
 	senderUsername string,
 	message string,
-	images [][]byte,
+	images []string,
 	recipientsUsernames []string,
 ) (*Post, error) {
 	// Check that all data for the post is valid
@@ -107,10 +108,14 @@ func NewPost(
 		recipients = append(recipients, validRecipient)
 	}
 
-	// Cast all []byte images to images (stupid but necessary step)
-	var imageImages []image
-	for _, byteImage := range images {
-		imageImages = append(imageImages, image(byteImage))
+	// Cast all base64 []string images to images
+	var byteImages []image
+	for _, base64Image := range images {
+		byteImage, err := base64.StdEncoding.DecodeString(base64Image)
+		if err != nil {
+			return nil, err
+		}
+		byteImages = append(byteImages, image(byteImage))
 	}
 
 	timestamp := time.Now()
@@ -119,7 +124,7 @@ func NewPost(
 		Sender:     sender,
 		Recipients: recipients,
 		Message:    message,
-		Images:     imageImages,
+		Images:     byteImages,
 	}
 	post.PostID = crypto.Sha3String(post.String())
 	return post, nil

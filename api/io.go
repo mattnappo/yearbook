@@ -10,8 +10,8 @@ type createUserRequest struct {
 type createPostRequest struct {
 	Sender     string   `json:"sender"`     // In the form first.last
 	Recipients []string `json:"recipients"` // In the form first.last
-	Message    string   `json:"message"`
-	Images     [][]byte `json:"images"`
+	Message    string   `json:"message"`    // Just a regular string
+	Images     []string `json:"images"`     // Slice of images in base64
 }
 
 // genericResponse represents a generic response.

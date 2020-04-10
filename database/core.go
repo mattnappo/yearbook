@@ -75,10 +75,10 @@ func (db *Database) AddUser(email string, grade models.Grade) error {
 }
 
 // GetUser gets a user from the database.
-func (db *Database) GetUser(userID string) (models.User, error) {
+func (db *Database) GetUser(username string) (models.User, error) {
 	user := &models.User{}
 	err := db.DB.Model(user).
-		Where("user_id = ?", userID).
+		Where("username = ?", username).
 		Select()
 	if err != nil {
 		return models.User{}, err
@@ -98,11 +98,11 @@ func (db *Database) GetAllUsers() ([]models.User, error) {
 }
 
 // DeleteUser deletes a user from the database
-func (db *Database) DeleteUser(userID string) error {
+func (db *Database) DeleteUser(username string) error {
 	db.mux.Lock()
 	defer db.mux.Unlock()
 	_, err := db.DB.Model(&models.User{}).
-		Where("user_id = ?", userID).
+		Where("username = ?", username).
 		Delete()
 	return err
 }
