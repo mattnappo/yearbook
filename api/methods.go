@@ -3,38 +3,29 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/xoreo/yearbook/common"
+	"github.com/xoreo/yearbook/models"
 )
 
 func createPost(w http.ResponseWriter, r *http.Request) {
-	logger := common.NewLogger("api.CreateServer")
-	w.Header().Set("Content-Type", "application/json") // Set the proper header
+	logger := common.NewLogger("api.createPost")
+	w.Header().Set("Content-Type", "application/json")
 
 	// Decode the post request
-	var requestData CreateServerRequest
-	json.NewDecoder(r.Body).Decode(&requestData)
+	var request createPostRequest
+	json.NewDecoder(r.Body).Decode(&request)
 
-	// Extract the data from the request
-	port, err := strconv.Atoi(requestData.Port)
-	if err != nil {
-		logger.Criticalf(err.Error())
-	}
+	logger.Infof("request to create post")
 
-	ram, err := strconv.Atoi(requestData.RAM)
-	if err != nil {
-		logger.Criticalf(err.Error())
-	}
-
-	logger.Infof("request to create server with specs:\n%s", requestData.String())
-
-	// Create the new server
-	server, err := types.NewServer(requestData.Version, requestData.Name, port, ram)
-	if err != nil {
-		logger.Criticalf(err.Error())
-	}
+	// Create the new post
+	post, err := models.NewPost(
+		request.Sender,
+		request.Message,
+		request.Images,
+		request.Recipients,
+	)
 
 	logger.Debugf("created new server entry %s", server.Hash.String())
 

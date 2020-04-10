@@ -38,8 +38,8 @@ type User struct {
 	UserID       string `pg:",notnull,unique"`
 	Firstname    string `pg:",notnull"`
 	Lastname     string `pg:",notnull"`
-	Username     string `pg:",notnull"`
-	Email        string `pg:",notnull"`
+	Username     string `pg:",notnull,unique"`
+	Email        string `pg:",notnull,unique"`
 	Grade        Grade
 	RegisterDate time.Time `pg:",notnull"`
 }
