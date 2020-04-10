@@ -1,5 +1,12 @@
 package common
 
+import (
+	"os"
+
+	"github.com/juju/loggo"
+	"github.com/juju/loggo/loggocolor"
+)
+
 const (
 	// EmailSuffix is the accepted email suffix.
 	EmailSuffix = "@mastersny.org"
@@ -19,4 +26,17 @@ const (
 	// PasswordFile is the location of the file containing the Postgres
 	// password.
 	PasswordFile = "../password.pwd"
+
+	// DefaultAPIRoot is the default API root.
+	DefaultAPIRoot = "/api"
 )
+
+// NewLogger will create a new default loggo.Logger.
+func NewLogger(context string) *loggo.Logger {
+	// Create and setup a new logger
+	logger := loggo.GetLogger(context)
+	logger.SetLogLevel(loggo.DEBUG)
+	loggo.ReplaceDefaultWriter(loggocolor.NewWriter(os.Stderr)) // Add colors
+
+	return &logger
+}

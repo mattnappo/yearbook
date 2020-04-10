@@ -36,8 +36,8 @@ func (db *Database) GetAllPosts() ([]models.Post, error) {
 	return posts, nil
 }
 
-// GetNPosts gets n posts from the database.
-func (db *Database) GetNPosts(n int) ([]models.Post, error) {
+// GetnPosts gets n posts from the database.
+func (db *Database) GetnPosts(n int) ([]models.Post, error) {
 	var posts []models.Post
 	err := db.DB.Model(&posts).Order("id ASC").Limit(n).Select()
 	if err != nil {

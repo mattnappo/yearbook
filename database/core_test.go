@@ -71,11 +71,11 @@ func TestGetAllPosts(t *testing.T) {
 	t.Log(posts)
 }
 
-func TestGetNPosts(t *testing.T) {
+func TestGetnPosts(t *testing.T) {
 	db := Connect(false)
 	defer db.Disconnect()
 
-	posts, err := db.GetNPosts(5)
+	posts, err := db.GetnPosts(5)
 	if err != nil {
 		t.Fatal(err)
 	}
