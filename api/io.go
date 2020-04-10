@@ -29,5 +29,5 @@ func newGenericResponse(data string, errors ...string) string {
 
 // ok returns an OK generic response.
 func ok() string {
-	return "success"
+	return "ok"
 }

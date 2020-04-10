@@ -1,12 +1,9 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/mux"
-	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/models"
 )
 
@@ -57,66 +54,40 @@ func (api *API) createPost(ctx *gin.Context) {
 
 // getPost gets a post.
 func (api *API) getPost(ctx *gin.Context) {
-	logger := common.NewLogger("api.GetServer")
-	w.Header().Set("Content-Type", "application/json")
 
-	// Extract the server hash from the request
-	hashString := mux.Vars(r)["post_id"]
-
-	logger.Infof("request to get %s", hashString)
-
-	logger.Debugf("got post %s from database", server.Hash.String())
-
-	// Prepare the response
-	res := GETServerResponse{
-		server.TimeCreated,
-		server.ID,
-		*server.Properties,
-		server.GetCoreProperties(),
-	}
-
-	// Write the response to the server
-	json.NewEncoder(w).Encode(res)
 }
 
+// getPosts gets all posts.
 func (api *API) getPosts(ctx *gin.Context) {
-	logger := common.NewLogger("api.getPosts")
-	// Write the response to the server
-	json.NewEncoder(w).Encode(res)
+
 }
 
+// getnPosts gets n posts.
 func (api *API) getnPosts(ctx *gin.Context) {
-	logger := common.NewLogger("api.getnPosts")
-	// Write the response to the server
-	json.NewEncoder(w).Encode(res)
+
 }
 
+// deletePost deletes a post.
 func (api *API) deletePost(ctx *gin.Context) {
-	logger := common.NewLogger("api.deletePost")
-	// Write the response to the server
-	json.NewEncoder(w).Encode(res)
+
 }
 
+// createUser creates a user.
 func (api *API) createUser(ctx *gin.Context) {
-	logger := common.NewLogger("api.createUser")
-	// Write the response to the server
-	json.NewEncoder(w).Encode(res)
+
 }
 
+// getUser gets a user.
 func (api *API) getUser(ctx *gin.Context) {
-	logger := common.NewLogger("api.getUser")
-	// Write the response to the server
-	json.NewEncoder(w).Encode(res)
+
 }
 
+// getUsers gets all users.
 func (api *API) getUsers(ctx *gin.Context) {
-	logger := common.NewLogger("api.getUsers")
-	// Write the response to the server
-	json.NewEncoder(w).Encode(res)
+
 }
 
+// deleteUser deletes a user.
 func (api *API) deleteUser(ctx *gin.Context) {
-	logger := common.NewLogger("api.deleteUser")
-	// Write the response to the server
-	json.NewEncoder(w).Encode(res)
+
 }
