@@ -7,10 +7,8 @@ import (
 	"github.com/xoreo/yearbook/models"
 )
 
-func (api *API) createPost(ctx *gin.Context) {
-	// Decode the post request
-	var request createPostRequest
-	err := ctx.ShouldBindJSON(&request)
+// check checks for an error.
+func (api *API) check(err error, ctx *gin.Context) {
 	if err != nil {
 		api.log.Criticalf(err.Error())
 		ctx.JSON(
@@ -18,6 +16,14 @@ func (api *API) createPost(ctx *gin.Context) {
 			newGenericResponse("", err.Error()),
 		)
 	}
+}
+
+// createPost creates a new post.
+func (api *API) createPost(ctx *gin.Context) {
+	// Decode the post request
+	var request createPostRequest
+	err := ctx.ShouldBindJSON(&request)
+	api.check(err, ctx)
 
 	api.log.Infof("request to create post")
 
@@ -28,32 +34,33 @@ func (api *API) createPost(ctx *gin.Context) {
 		request.Images,
 		request.Recipients,
 	)
-	if err != nil {
-		api.log.Criticalf(err.Error())
-		ctx.JSON(
-			http.StatusInternalServerError,
-			newGenericResponse("", err.Error()),
-		)
-	}
-	api.log.Debugf("constructed new post \n%v", post)
+	api.check(err, ctx)
+
+	api.log.Debugf("constructed new post %s", post.String())
 
 	// Add it to the database
 	err = api.database.AddPost(post)
-	if err != nil {
-		api.log.Criticalf(err.Error())
-		ctx.JSON(
-			http.StatusInternalServerError,
-			newGenericResponse("", err.Error()),
-		)
-	}
-	api.log.Debugf("added post %s to the database", post.PostID)
+	api.check(err, ctx)
+
+	api.log.Debugf("added post %s to the database", post.String())
 	api.log.Infof("created new post %s", post.PostID)
 
 	ctx.JSON(http.StatusOK, ok())
 }
 
 // getPost gets a post.
-func (api *API) getPost(ctx *gin.Context) {}
+func (api *API) getPost(ctx *gin.Context) {
+	id := ctx.Param("id")
+	api.log.Infof("request to get post %s", id)
+
+	post, err := api.database.GetPost(id)
+	api.check(err, ctx)
+
+	api.log.Debugf("got post %s from database", post.String())
+	api.log.Infof("got post %s", post.ID)
+
+	ctx.JSON(http.StatusOK, newGenericResponse(post.String()))
+}
 
 // getPosts gets all posts.
 func (api *API) getPosts(ctx *gin.Context) {}
