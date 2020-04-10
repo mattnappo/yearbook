@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xoreo/yearbook/models"
@@ -88,7 +89,21 @@ func (api *API) getPosts(ctx *gin.Context) {
 
 // getnPosts gets n posts.
 func (api *API) getnPosts(ctx *gin.Context) {
+	n := ctx.Param("n")
+	api.log.Infof("request to get %s posts", n)
 
+	nInt, err := strconv.Atoi(n)
+	if api.check(err, ctx) {
+		return
+	}
+
+	posts, err := api.database.GetnPosts(nInt)
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Infof("got %d posts", n)
+	ctx.JSON(http.StatusOK, gr(posts))
 }
 
 // deletePost deletes a post.
