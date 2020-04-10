@@ -4,6 +4,7 @@ package api
 import (
 	"fmt"
 	"os"
+	"os/signal"
 	"path"
 	"path/filepath"
 	"strconv"
@@ -75,7 +76,32 @@ func StartAPIServer(port int64) error {
 
 	api.log.Infof("API server to listen on port %d", port)
 
+	// Catch intrerupt
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func(api *API) {
+		for sig := range c {
+			// Shutdown the API when ctrl-C is pressed
+			api.shutdown(sig)
+			os.Exit(0)
+		}
+	}(api)
+
 	return api.router.Run("0.0.0.0:" + strconv.FormatInt(port, 10))
+}
+
+// shutdown shuts down the API.
+func (api *API) shutdown(sig os.Signal) {
+	api.log.Debugf("caught %v", sig)
+	api.log.Infof("shutting down API server")
+
+	api.database.Disconnect()
+	api.log.Debugf("disconnected from database")
+
+	api.router = nil
+	api.log.Debugf("destroyed router")
+
+	api.log.Infof("API server shut down")
 }
 
 // initLogger initializes the api's logger.
@@ -85,6 +111,8 @@ func (api *API) initLogger() error {
 	if err != nil {
 		return err
 	}
+
+	logger.SetLogLevel(loggo.DEBUG)
 
 	// Create the log file
 	logFile, err := os.OpenFile(filepath.FromSlash(fmt.Sprintf(
