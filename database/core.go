@@ -4,8 +4,8 @@ import "github.com/xoreo/yearbook/models"
 
 // AddPost adds a post to the database.
 func (db *Database) AddPost(post *models.Post) error {
-	// db.mux.Lock()
-	// defer db.mux.Unlock()
+	db.mux.Lock()
+	defer db.mux.Unlock()
 	err := db.DB.Insert(post)
 	if err != nil {
 		return err
@@ -50,7 +50,11 @@ func (db *Database) GetNPosts(n int) ([]models.Post, error) {
 func (db *Database) DeletePost(postID string) error {
 	db.mux.Lock()
 	defer db.mux.Unlock()
-	return db.DB.Delete(&models.Post{PostID: postID})
+
+	_, err := db.DB.Model(&models.Post{}).
+		Where("post.post_id = ?", postID).
+		Delete()
+	return err
 }
 
 // AddUser adds a new user to the database.
@@ -74,7 +78,7 @@ func (db *Database) AddUser(email string, grade models.Grade) error {
 func (db *Database) GetUser(userID string) (models.User, error) {
 	user := &models.User{}
 	err := db.DB.Model(user).
-		Where("user.user_id = ?", userID).
+		Where("user_id = ?", userID).
 		Select()
 	if err != nil {
 		return models.User{}, err
@@ -97,5 +101,8 @@ func (db *Database) GetAllUsers() ([]models.User, error) {
 func (db *Database) DeleteUser(userID string) error {
 	db.mux.Lock()
 	defer db.mux.Unlock()
-	return db.DB.Delete(&models.User{UserID: userID})
+	_, err := db.DB.Model(&models.User{}).
+		Where("user_id = ?", userID).
+		Delete()
+	return err
 }
