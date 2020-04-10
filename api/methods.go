@@ -7,15 +7,17 @@ import (
 	"github.com/xoreo/yearbook/models"
 )
 
-// check checks for an error.
-func (api *API) check(err error, ctx *gin.Context) {
+// check checks for an error. Returns true if the request shuold be
+// terminated, false if it shold stay alive.
+func (api *API) check(err error, ctx *gin.Context) bool {
 	if err != nil {
 		api.log.Criticalf(err.Error())
-		ctx.JSON(
-			http.StatusInternalServerError,
-			newGenericResponse("", err.Error()),
+		ctx.JSON( // Respond with the error
+			http.StatusInternalServerError, gr("", err.Error()),
 		)
+		return true
 	}
+	return false
 }
 
 // createPost creates a new post.
@@ -23,7 +25,12 @@ func (api *API) createPost(ctx *gin.Context) {
 	// Decode the post request
 	var request createPostRequest
 	err := ctx.ShouldBindJSON(&request)
-	api.check(err, ctx)
+	if err != nil {
+
+	}
+	if api.check(err, ctx) {
+		return
+	}
 
 	api.log.Infof("request to create post")
 
@@ -34,16 +41,19 @@ func (api *API) createPost(ctx *gin.Context) {
 		request.Images,
 		request.Recipients,
 	)
-	api.check(err, ctx)
+	if api.check(err, ctx) {
+		return
+	}
 
 	api.log.Debugf("constructed new post %s", post.String())
 
 	// Add it to the database
 	err = api.database.AddPost(post)
-	api.check(err, ctx)
+	if api.check(err, ctx) {
+		return
+	}
 
-	api.log.Debugf("added post %s to the database", post.String())
-	api.log.Infof("created new post %s", post.PostID)
+	api.log.Infof("created new post %s", post.String())
 
 	ctx.JSON(http.StatusOK, ok())
 }
@@ -54,19 +64,32 @@ func (api *API) getPost(ctx *gin.Context) {
 	api.log.Infof("request to get post %s", id)
 
 	post, err := api.database.GetPost(id)
-	api.check(err, ctx)
+	if api.check(err, ctx) {
+		return
+	}
 
-	api.log.Debugf("got post %s from database", post.String())
-	api.log.Infof("got post %s", post.ID)
+	api.log.Infof("got post %s from database", post.String())
 
-	ctx.JSON(http.StatusOK, newGenericResponse(post.String()))
+	ctx.JSON(http.StatusOK, gr(post))
 }
 
 // getPosts gets all posts.
-func (api *API) getPosts(ctx *gin.Context) {}
+func (api *API) getPosts(ctx *gin.Context) {
+	api.log.Infof("request to get all posts")
+
+	posts, err := api.database.GetAllPosts()
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Infof("got all posts")
+	ctx.JSON(http.StatusOK, gr(posts))
+}
 
 // getnPosts gets n posts.
-func (api *API) getnPosts(ctx *gin.Context) {}
+func (api *API) getnPosts(ctx *gin.Context) {
+
+}
 
 // deletePost deletes a post.
 func (api *API) deletePost(ctx *gin.Context) {}

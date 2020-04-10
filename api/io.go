@@ -1,7 +1,5 @@
 package api
 
-import "encoding/json"
-
 // createUserRequest is the structure of a request to create a new user.
 type createUserRequest struct {
 	Email string `json:"email"`
@@ -16,18 +14,16 @@ type createPostRequest struct {
 
 // genericResponse represents a generic response.
 type genericResponse struct {
-	Data   string   `json:"data"`
-	Errors []string `json:"errors"`
+	Data   interface{} `json:"data"`
+	Errors []string    `json:"errors"`
 }
 
-// newGenericResponse constructs a new genericResponse as a string.
-func newGenericResponse(data string, errors ...string) string {
-	gr := genericResponse{data, errors}
-	json, _ := json.MarshalIndent(gr, " ", "  ")
-	return string(json)
+// gr constructs a new genericResponse.
+func gr(data interface{}, errors ...string) genericResponse {
+	return genericResponse{data, errors}
 }
 
 // ok returns an OK generic response.
-func ok() string {
-	return "ok"
+func ok() genericResponse {
+	return genericResponse{"", nil}
 }
