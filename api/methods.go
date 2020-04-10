@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -23,17 +24,14 @@ func (api *API) check(err error, ctx *gin.Context) bool {
 
 // createPost creates a new post.
 func (api *API) createPost(ctx *gin.Context) {
+	api.log.Infof("request to create post")
+
 	// Decode the post request
 	var request createPostRequest
 	err := ctx.ShouldBindJSON(&request)
-	if err != nil {
-
-	}
 	if api.check(err, ctx) {
 		return
 	}
-
-	api.log.Infof("request to create post")
 
 	// Create the new post
 	post, err := models.NewPost(
@@ -55,7 +53,6 @@ func (api *API) createPost(ctx *gin.Context) {
 	}
 
 	api.log.Infof("created new post %s", post.String())
-
 	ctx.JSON(http.StatusOK, ok())
 }
 
@@ -70,7 +67,6 @@ func (api *API) getPost(ctx *gin.Context) {
 	}
 
 	api.log.Infof("got post %s from database", post.String())
-
 	ctx.JSON(http.StatusOK, gr(post))
 }
 
@@ -107,10 +103,67 @@ func (api *API) getnPosts(ctx *gin.Context) {
 }
 
 // deletePost deletes a post.
-func (api *API) deletePost(ctx *gin.Context) {}
+func (api *API) deletePost(ctx *gin.Context) {
+	postID := ctx.Param("id")
+	api.log.Infof("request to delete post %s", postID)
+
+	err := api.database.DeletePost(postID)
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Infof("deleted post %s", postID)
+	ctx.JSON(http.StatusOK, ok())
+}
 
 // createUser creates a user.
-func (api *API) createUser(ctx *gin.Context) {}
+func (api *API) createUser(ctx *gin.Context) {
+	api.log.Infof("request to create user")
+
+	// Decode the new user request
+	var request createUserRequest
+	err := ctx.ShouldBindJSON(&request)
+	if api.check(err, ctx) {
+		return
+	}
+
+	// Determine the grade from the request
+	var grade models.Grade
+	switch request.Grade {
+	case "freshman":
+		grade = models.Freshman
+		break
+	case "sophomore":
+		grade = models.Sophomore
+		break
+	case "junior":
+		grade = models.Junior
+		break
+	case "senior":
+		grade = models.Senior
+		break
+	default:
+		if api.check(errors.New("invalid grade"), ctx) {
+			return
+		}
+	}
+
+	// Create the new user
+	user, err := models.NewUser(request.Email, grade)
+	if api.check(err, ctx) {
+		return
+	}
+	api.log.Debugf("constructed new user %s", user.String())
+
+	// Add it to the database
+	err = api.database.AddUser(user)
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Infof("created new user %s", user.String())
+	ctx.JSON(http.StatusOK, ok())
+}
 
 // getUser gets a user.
 func (api *API) getUser(ctx *gin.Context) {}

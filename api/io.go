@@ -3,6 +3,7 @@ package api
 // createUserRequest is the structure of a request to create a new user.
 type createUserRequest struct {
 	Email string `json:"email"`
+	Grade string `json:"grade"`
 }
 
 type createPostRequest struct {

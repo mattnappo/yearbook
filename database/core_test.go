@@ -89,7 +89,12 @@ func TestAddUser(t *testing.T) {
 	db := Connect(false)
 	defer db.Disconnect()
 
-	err := db.AddUser(genRandEmail(), models.Freshman)
+	user, err := models.NewUser("cool.dude@mastersny.org", models.Freshman)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = db.AddUser(user)
 	if err != nil {
 		t.Fatal(err)
 	}
