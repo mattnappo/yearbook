@@ -26,3 +26,8 @@ func newGenericResponse(data string, errors ...string) string {
 	json, _ := json.MarshalIndent(gr, " ", "  ")
 	return string(json)
 }
+
+// ok returns an OK generic response.
+func ok() string {
+	return "success"
+}

@@ -6,27 +6,23 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/mux"
-	"github.com/juju/loggo"
 	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/models"
 )
 
 func (api *API) createPost(ctx *gin.Context) {
-	logger := common.NewLogger("api.createPost")
-
 	// Decode the post request
 	var request createPostRequest
 	err := ctx.ShouldBindJSON(&request)
 	if err != nil {
-		api.log.Logf(loggo.ERROR, err.Error())
+		api.log.Criticalf(err.Error())
 		ctx.JSON(
 			http.StatusInternalServerError,
 			newGenericResponse("", err.Error()),
 		)
-		return
 	}
 
-	logger.Infof("request to create post")
+	api.log.Infof("request to create post")
 
 	// Create the new post
 	post, err := models.NewPost(
@@ -36,14 +32,27 @@ func (api *API) createPost(ctx *gin.Context) {
 		request.Recipients,
 	)
 	if err != nil {
-		logger.Criticalf(err.Error())
+		api.log.Criticalf(err.Error())
+		ctx.JSON(
+			http.StatusInternalServerError,
+			newGenericResponse("", err.Error()),
+		)
 	}
-	logger.Debugf("constructed new post %s", post.PostID)
+	api.log.Debugf("constructed new post %s", post.PostID)
 
-	logger.Debugf("added post %s to the database", post.PostID)
-	logger.Infof("created new post %s", post.PostID)
+	// Add it to the database
+	err = api.database.AddPost(post)
+	if err != nil {
+		api.log.Criticalf(err.Error())
+		ctx.JSON(
+			http.StatusInternalServerError,
+			newGenericResponse("", err.Error()),
+		)
+	}
+	api.log.Debugf("added post %s to the database", post.PostID)
+	api.log.Infof("created new post %s", post.PostID)
 
-	json.NewEncoder(w).Encode(*post) // Write to the server
+	ctx.JSON(http.StatusOK, ok())
 }
 
 // getPost gets a post.
