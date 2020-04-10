@@ -20,6 +20,9 @@ const (
 	// MaxMessageLength is the maximum amount of characters in a post message.
 	MaxMessageLength = 2000
 
+	// MaxEmailLength is the maximum amount of characters in an email.
+	MaxEmailLength = 255
+
 	// DatabaseName is the name of the Postgres database.
 	DatabaseName = "new_tests"
 

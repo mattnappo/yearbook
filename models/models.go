@@ -13,8 +13,11 @@ import (
 )
 
 var (
-	errInvalidEmail = errors.New("invalid email address")
+	errInvalidEmail = errors.New("malformed email address")
 )
+
+// Username represents a username.
+type Username string
 
 type image []byte
 
@@ -34,11 +37,11 @@ const (
 
 // User represents a user.
 type User struct {
-	ID           int32  `pg:",pk"`
-	UserID       string `pg:",notnull,unique"`
+	ID       int32    `pg:",pk"`
+	Username Username `pg:",notnull,unique"`
+
 	Firstname    string `pg:",notnull"`
 	Lastname     string `pg:",notnull"`
-	Username     string `pg:",notnull,unique"`
 	Email        string `pg:",notnull,unique"`
 	Grade        Grade
 	RegisterDate time.Time `pg:",notnull"`
@@ -46,8 +49,9 @@ type User struct {
 
 // Post represents a post in the database.
 type Post struct {
-	ID         int32     `pg:",pk"`
-	PostID     string    `pg:",notnull,unique"`
+	ID     int32  `pg:",pk"`
+	PostID string `pg:",notnull,unique"`
+
 	Timestamp  time.Time `pg:",notnull"`
 	Sender     User      `pg:",notnull"`
 	Recipients []*User   `pg:",notnull"`
@@ -58,52 +62,37 @@ type Post struct {
 
 // NewUser creates a *User given a valid email and grade.
 func NewUser(email string, grade Grade) (*User, error) {
-	// Check that the last part of the email is the correct email suffix
-	if email[len(email)-len(common.EmailSuffix):] == common.EmailSuffix {
-		userData := strings.Split(email, ".")
+	userData := strings.Split(email, ".")
 
-		// Check that there is only one first name and one last name
-		if len(userData) != 3 {
-			return nil, errInvalidEmail
-		}
-
-		return &User{
-			UserID:       calcUserID(email),
-			Firstname:    userData[0],
-			Lastname:     strings.Split(userData[1], "@")[0],
-			Username:     email[0 : len(email)-len(common.EmailSuffix)],
-			Email:        email,
-			Grade:        grade,
-			RegisterDate: time.Now(),
-		}, nil
+	// Check that there is only one first name and one last name
+	if len(userData) != 3 {
+		return nil, errInvalidEmail
 	}
-	return nil, errInvalidEmail
-}
 
-// calcUserID calculates the user ID.
-func calcUserID(email string) string {
-	return crypto.Sha3String(email)
-}
-
-// isValidUser checks if a User struct is valid
-func (user *User) isValid() bool {
-	l := len(user.Email) - len(common.EmailSuffix)
-	if user.Email[l:] == common.EmailSuffix &&
-		len(strings.Split(user.Email, ".")) == 3 {
-		return true
+	username, err := UsernameFromEmail(email)
+	if err != nil {
+		return nil, err
 	}
-	return false
+
+	return &User{
+		Username:     username,
+		Firstname:    username.firstname(),
+		Lastname:     username.lastname(),
+		Email:        username.email(),
+		Grade:        grade,
+		RegisterDate: time.Now(),
+	}, nil
 }
 
 // NewPost creates a new post.
 func NewPost(
-	sender *User,
+	sender UserID,
 	message string,
-	imagePaths []string,
-	recipients ...*User,
+	imagePaths [][]byte,
+	recipients []string,
 ) (*Post, error) {
 	// Check that all data for the post is valid
-	if sender == nil || len(recipients) > common.MaxRecipients ||
+	if sender == "" || len(recipients) > common.MaxRecipients ||
 		len(recipients) <= 0 || message == "" ||
 		len(message) > common.MaxMessageLength ||
 		len(imagePaths) > common.MaxImages {
@@ -141,6 +130,29 @@ func NewPost(
 		Message:    message,
 		Images:     images,
 	}, nil
+}
+
+// UsernameFromEmail constructs a username given an email.
+func UsernameFromEmail(email string) (Username, error) {
+	if len(email) > common.MaxEmailLength {
+		return errors.New("email is too long")
+	}
+
+	// Check that the email suffix is at the end
+	if email[len(email)-len(common.EmailSuffix):] != common.EmailSuffix {
+		return errInvalidEmail
+	}
+	return email[0 : len(email)-len(common.EmailSuffix)]
+}
+
+func (u Username) firstname() string {
+	components := strings.Split(string(u), ".")
+	return components[0]
+}
+
+func (u Username) lastname() string {
+	components := strings.Split(string(u), ".")
+	return components[0]
 }
 
 // String marshals auser to a string.
