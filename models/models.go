@@ -91,6 +91,11 @@ func NewPost(
 		return nil, errors.New("too much or not enough data to construct post")
 	}
 
+	// Validate sender username
+	sender, err := validateUsername(senderUsername)
+	if err != nil {
+		return nil, err
+	}
 	// Validate all recipient usernames
 	var recipients []Username
 	for _, recipient := range recipientsUsernames {
@@ -100,11 +105,6 @@ func NewPost(
 		}
 		// Add valid recipient to the slice of valid recipients
 		recipients = append(recipients, validRecipient)
-	}
-	// Validate sender username
-	sender, err := validateUsername(senderUsername)
-	if err != nil {
-		return nil, err
 	}
 
 	// Cast all []byte images to images (stupid but necessary step)
