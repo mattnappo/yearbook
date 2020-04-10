@@ -48,9 +48,9 @@ func (api *API) setupRoutes() {
 	api.router.DELETE(path.Join(api.root, "deletePost/:id"), api.deletePost)
 
 	api.router.POST(path.Join(api.root, "createUser"), api.createUser)
-	api.router.GET(path.Join(api.root, "getUser/:id"), api.getUser)
+	api.router.GET(path.Join(api.root, "getUser/:username"), api.getUser)
 	api.router.GET(path.Join(api.root, "getUsers"), api.getUsers)
-	api.router.DELETE(path.Join(api.root, "deleteUser/:id"), api.deleteUser)
+	api.router.DELETE(path.Join(api.root, "deleteUser/:username"), api.deleteUser)
 
 	api.log.Infof("initialized API server routes")
 }

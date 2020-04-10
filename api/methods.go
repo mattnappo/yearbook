@@ -166,10 +166,43 @@ func (api *API) createUser(ctx *gin.Context) {
 }
 
 // getUser gets a user.
-func (api *API) getUser(ctx *gin.Context) {}
+func (api *API) getUser(ctx *gin.Context) {
+	username := ctx.Param("username")
+	api.log.Infof("request to get user %s", username)
+
+	user, err := api.database.GetUser(username)
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Infof("got user %s", user.String())
+	ctx.JSON(http.StatusOK, gr(user))
+}
 
 // getUsers gets all users.
-func (api *API) getUsers(ctx *gin.Context) {}
+func (api *API) getUsers(ctx *gin.Context) {
+	api.log.Infof("request to get all users")
+
+	users, err := api.database.GetAllUsers()
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Infof("got all users")
+	ctx.JSON(http.StatusOK, gr(users))
+
+}
 
 // deleteUser deletes a user.
-func (api *API) deleteUser(ctx *gin.Context) {}
+func (api *API) deleteUser(ctx *gin.Context) {
+	username := ctx.Param("username")
+	api.log.Infof("request to delete user %s", username)
+
+	err := api.database.DeleteUser(username)
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Infof("deleted user %s", username)
+	ctx.JSON(http.StatusOK, ok())
+}
