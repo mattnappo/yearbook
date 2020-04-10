@@ -26,33 +26,15 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		request.Images,
 		request.Recipients,
 	)
-
-	logger.Debugf("created new server entry %s", server.Hash.String())
-
-	// Initialize the server
-	err = commands.InitializeServer(server)
 	if err != nil {
 		logger.Criticalf(err.Error())
 	}
+	logger.Debugf("constructed new post %s", post.PostID)
 
-	logger.Debugf("server initialization complete")
+	logger.Debugf("added post %s to the database", post.PostID)
+	logger.Infof("created new post %s", post.PostID)
 
-	// Add the newly-created server to the database
-	serverDB, err := types.LoadDB()
-	if err != nil {
-		logger.Criticalf(err.Error())
-	}
-
-	err = serverDB.AddServer(server)
-	if err != nil {
-		logger.Criticalf(err.Error())
-	}
-	serverDB.Close()
-
-	logger.Debugf("added new server to the database")
-	logger.Infof("created new server %s", server.Hash.String())
-
-	json.NewEncoder(w).Encode(*server) // Write to the server
+	json.NewEncoder(w).Encode(*post) // Write to the server
 }
 
 // getPost gets a post.

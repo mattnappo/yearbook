@@ -9,22 +9,25 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/juju/loggo"
 	"github.com/xoreo/yearbook/common"
+	"github.com/xoreo/yearbook/database"
 )
 
 // API contains the API layer.
 type API struct {
-	router *mux.Router
-	log    *loggo.Logger
+	router   *mux.Router
+	database *database.Database
+	log      *loggo.Logger
 
 	root string
 	port int
 }
 
-// NewAPI constructs a new API struct.
-func NewAPI(port int) *API {
+// newAPI constructs a new API struct.
+func newAPI(port int) *API {
 	api := &API{
-		router: mux.NewRouter(),
-		log:    common.NewLogger("api"),
+		router:   mux.NewRouter(),
+		log:      common.NewLogger("api"),
+		database: nil,
 
 		root: common.DefaultAPIRoot,
 		port: port,
@@ -36,8 +39,9 @@ func NewAPI(port int) *API {
 	return api
 }
 
-// SetupRoutes initializes the necessary routes.
+// setupRoutes initializes the necessary routes.
 func (api *API) setupRoutes() {
+	// Oh boi do I need to clean up this bad boi
 	api.router.HandleFunc(path.Join(api.root, "createPost"), createPost).
 		Methods("POST")
 	api.router.HandleFunc(path.Join(api.root, "getPost/{id}"), getPost).
@@ -63,7 +67,10 @@ func (api *API) setupRoutes() {
 
 // StartAPIServer starts the API server.
 func StartAPIServer(port int) error {
-	api := NewAPI(port)
+	api := newAPI(port)
+
+	api.database = database.Connect(false)
+	defer api.database.Disconnect()
 
 	api.log.Infof("API server to listen on port %d", port)
 	return http.ListenAndServe(":"+strconv.Itoa(api.port), api.router)

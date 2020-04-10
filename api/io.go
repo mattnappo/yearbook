@@ -6,8 +6,8 @@ type createUserRequest struct {
 }
 
 type createPostRequest struct {
-	Sender     string   `json:"sender"`
-	Recipients []string `json:"recipients"`
+	Sender     string   `json:"sender"`     // In the form first.last
+	Recipients []string `json:"recipients"` // In the form first.last
 	Message    string   `json:"message"`
 	Images     [][]byte `json:"images"`
 }
