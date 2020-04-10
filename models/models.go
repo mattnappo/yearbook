@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"strings"
 	"time"
 
@@ -52,9 +51,9 @@ type Post struct {
 	ID     int32  `pg:",pk"`
 	PostID string `pg:",notnull,unique"`
 
-	Timestamp  time.Time `pg:",notnull"`
-	Sender     User      `pg:",notnull"`
-	Recipients []*User   `pg:",notnull"`
+	Timestamp  time.Time  `pg:",notnull"`
+	Sender     Username   `pg:",notnull"`
+	Recipients []Username `pg:",notnull"`
 
 	Message string  `pg:",notnull"`
 	Images  []image `pg:",notnull,array"`
@@ -62,13 +61,6 @@ type Post struct {
 
 // NewUser creates a *User given a valid email and grade.
 func NewUser(email string, grade Grade) (*User, error) {
-	userData := strings.Split(email, ".")
-
-	// Check that there is only one first name and one last name
-	if len(userData) != 3 {
-		return nil, errInvalidEmail
-	}
-
 	username, err := UsernameFromEmail(email)
 	if err != nil {
 		return nil, err
@@ -86,50 +78,52 @@ func NewUser(email string, grade Grade) (*User, error) {
 
 // NewPost creates a new post.
 func NewPost(
-	sender Username,
+	senderUsername string,
 	message string,
-	imagePaths [][]byte,
-	recipients []Username,
+	images [][]byte,
+	recipientsUsernames []string,
 ) (*Post, error) {
 	// Check that all data for the post is valid
-	if len(recipients) > common.MaxRecipients ||
-		len(recipients) <= 0 || message == "" ||
+	if len(recipientsUsernames) > common.MaxRecipients ||
+		len(recipientsUsernames) <= 0 || message == "" ||
 		len(message) > common.MaxMessageLength ||
-		len(imagePaths) > common.MaxImages {
+		len(images) > common.MaxImages {
 		return nil, errors.New("too much or not enough data to construct post")
 	}
 
-	// Check that the users are valid
-	for _, user := range recipients {
-		if !user.isValid() {
-			return nil, fmt.Errorf("invalid user '%s'", user.Email)
-		}
-	}
-	if !sender.isValid() {
-		return nil, fmt.Errorf("invalid user '%s'", sender.Email)
-	}
-
-	// Load the images into a [][]byte
-	var images []image
-	for _, imagePath := range imagePaths {
-		tImage, err := ioutil.ReadFile(imagePath)
+	// Validate all recipient usernames
+	var recipients []Username
+	for _, recipient := range recipientsUsernames {
+		validRecipient, err := validateUsername(recipient)
 		if err != nil {
 			return nil, err
 		}
-		images = append(images, image(tImage))
+		// Add valid recipient to the slice of valid recipients
+		recipients = append(recipients, validRecipient)
+	}
+	// Validate sender username
+	sender, err := validateUsername(senderUsername)
+	if err != nil {
+		return nil, err
+	}
+
+	// Cast all []byte images to images (stupid but necessary step)
+	var imageImages []image
+	for _, byteImage := range images {
+		imageImages = append(imageImages, image(byteImage))
 	}
 
 	timestamp := time.Now()
-	return &Post{
-		PostID: crypto.Sha3String(
-			sender.Email + timestamp.String() + message,
-		),
+	post := &Post{
 		Timestamp:  timestamp,
-		Sender:     *sender,
+		Sender:     sender,
 		Recipients: recipients,
 		Message:    message,
-		Images:     images,
-	}, nil
+		Images:     imageImages,
+	}
+	post.PostID = crypto.Sha3String(post.String())
+	return post, nil
+
 }
 
 // UsernameFromEmail constructs a username given an email.
@@ -164,8 +158,20 @@ func (u Username) lastname() string {
 
 // return the email associated with the username.
 func (u Username) email() string {
-	components := strings.Split(string(u), ".")
-	return strings.Split(components[1], "@")[0]
+	return string(u) + common.EmailSuffix
+}
+
+// isValid checks if a given username is valid.
+func (u Username) isValid() bool {
+	return len(strings.Split(string(u), ".")) == 2
+}
+
+// validateUsername will attempt to validate a username.
+func validateUsername(u string) (Username, error) {
+	if Username(u).isValid() {
+		return Username(u), nil
+	}
+	return Username(""), fmt.Errorf("invalid username '%s", u)
 }
 
 // String marshals a user to a string.
