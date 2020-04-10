@@ -86,17 +86,17 @@ func NewUser(email string, grade Grade) (*User, error) {
 
 // NewPost creates a new post.
 func NewPost(
-	sender UserID,
+	sender Username,
 	message string,
 	imagePaths [][]byte,
-	recipients []string,
+	recipients []Username,
 ) (*Post, error) {
 	// Check that all data for the post is valid
-	if sender == "" || len(recipients) > common.MaxRecipients ||
+	if len(recipients) > common.MaxRecipients ||
 		len(recipients) <= 0 || message == "" ||
 		len(message) > common.MaxMessageLength ||
 		len(imagePaths) > common.MaxImages {
-		return nil, errors.New("invalid data to construct post")
+		return nil, errors.New("too much or not enough data to construct post")
 	}
 
 	// Check that the users are valid
@@ -134,28 +134,41 @@ func NewPost(
 
 // UsernameFromEmail constructs a username given an email.
 func UsernameFromEmail(email string) (Username, error) {
+	// Check that the email is not too long
 	if len(email) > common.MaxEmailLength {
-		return errors.New("email is too long")
+		return Username(""), errors.New("email is too long")
 	}
 
-	// Check that the email suffix is at the end
-	if email[len(email)-len(common.EmailSuffix):] != common.EmailSuffix {
-		return errInvalidEmail
+	// Check that the email suffix is at the end and that there is only one first
+	// name and one last name.
+	if email[len(email)-len(common.EmailSuffix):] != common.EmailSuffix ||
+		len(strings.Split(email, ".")) != 3 {
+		return Username(""), errInvalidEmail
 	}
-	return email[0 : len(email)-len(common.EmailSuffix)]
+
+	// Return firstname.lastname
+	return Username(email[0 : len(email)-len(common.EmailSuffix)]), nil
 }
 
+// return the first name associated with the username.
 func (u Username) firstname() string {
 	components := strings.Split(string(u), ".")
 	return components[0]
 }
 
+// return the last name associated with the username.
 func (u Username) lastname() string {
 	components := strings.Split(string(u), ".")
-	return components[0]
+	return strings.Split(components[1], "@")[0]
 }
 
-// String marshals auser to a string.
+// return the email associated with the username.
+func (u Username) email() string {
+	components := strings.Split(string(u), ".")
+	return strings.Split(components[1], "@")[0]
+}
+
+// String marshals a user to a string.
 func (user *User) String() string {
 	json, _ := json.MarshalIndent(*user, " ", "  ")
 	return string(json)
