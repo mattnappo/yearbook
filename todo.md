@@ -5,4 +5,4 @@
 5. Add "registered" tag and create un-established users on post create with registered = false. Set registered = true when registering happens.
 6. Traefik integration
 7. Docker
-8. 
+8. Allow for different status in api.check 

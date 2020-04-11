@@ -1,7 +1,7 @@
 package api
 
 import (
-	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -14,7 +14,7 @@ import (
 func (api *API) check(err error, ctx *gin.Context) bool {
 	if err != nil {
 		api.log.Criticalf(err.Error())
-		ctx.JSON( // Respond with the error
+		ctx.AbortWithStatusJSON( // Respond with the error}
 			http.StatusInternalServerError, gr("", err.Error()),
 		)
 		return true
@@ -143,9 +143,8 @@ func (api *API) createUser(ctx *gin.Context) {
 		grade = models.Senior
 		break
 	default:
-		if api.check(errors.New("invalid grade"), ctx) {
-			return
-		}
+		api.check(fmt.Errorf("invalid grade %v", request.Grade), ctx)
+		return
 	}
 
 	// Create the new user

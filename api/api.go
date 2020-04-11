@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/juju/loggo"
 	"github.com/juju/loggo/loggocolor"
@@ -18,28 +20,56 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const (
+	// defaultAPIRoot is the default API root.
+	defaultAPIRoot = "/api"
+
+	// defaultOAuthRoot is the default API root for all OAuth2-related
+	// requests.
+	defaultOAuthRoot = "/oauth"
+)
+
 // API contains the API layer.
 type API struct {
 	router   *gin.Engine
 	database *database.Database
 	log      *loggo.Logger
 
-	root string
+	root      string
+	oauthRoot string
+
 	port int64
 
 	oauthConfig *oauth2.Config
+	cookieStore cookie.Store
 }
 
 // newAPI constructs a new API struct.
 func newAPI(port int64) (*API, error) {
+	// Generate the store
+	cookieStore := cookie.NewStore(
+		[]byte(common.GetEnv("COOKIE_SECRET")),
+	)
+
+	// Initialize the router
+	r := gin.New()
+	r.Use(sessions.Sessions("go_session", cookieStore))
+	r.Use(gin.Recovery())
+
+	// Construct the API
 	api := &API{
-		router:   gin.New(),
+		router:   r,
 		database: nil,
 
-		root: common.DefaultAPIRoot,
+		root:      defaultAPIRoot,
+		oauthRoot: defaultOAuthRoot,
+
 		port: port,
+
+		cookieStore: cookieStore,
 	}
 
+	// Setup the logger
 	err := api.initLogger()
 	if err != nil {
 		return nil, err
