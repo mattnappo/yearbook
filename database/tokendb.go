@@ -26,8 +26,11 @@ func (db *Database) InsertToken(
 		token.Email = email[0]
 	}
 
-	// Put it in the database
-	err := db.DB.Insert(token)
+	// Insert if it is not there, update if it is.
+	_, err := db.DB.Model(token).
+		OnConflict("(sub) DO UPDATE").
+		Set("token = EXCLUDED.token").
+		Insert()
 	if err != nil {
 		return err
 	}

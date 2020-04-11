@@ -221,7 +221,8 @@ func (api *API) authorize(ctx *gin.Context) {
 	if api.check(err, ctx) {
 		return
 	}
-	api.log.Debugf("checkToken: %s", checkToken)
+	api.log.Debugf("actualToken: %s", token.AccessToken)
+	api.log.Debugf(" checkToken: %s", checkToken)
 
 	// Store the OAuth2 exchaneg token in a cookie
 	session.Set("google_oauth2_token", token.AccessToken)
