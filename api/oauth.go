@@ -42,7 +42,6 @@ func (api *API) initializeOAuth() {
 		ClientSecret: common.GetEnv("GOOGLE_CLIENT_SECRET"),
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email",
-			// "userid",
 		},
 		Endpoint: google.Endpoint,
 	}
@@ -52,10 +51,10 @@ func (api *API) initializeOAuth() {
 
 // initializeOAuthRoutes initializes the OAuth2-related API routes.
 func (api *API) initializeOAuthRoutes() {
-	api.router.GET("/", api.index)
+	api.router.GET("/home", api.home)
 
 	api.router.GET(path.Join(api.oauthRoot, "login"), api.login)
-	api.router.GET(path.Join(api.oauthRoot, "authenticate"), api.authenticate)
+	api.router.GET(path.Join(api.oauthRoot, "authorize"), api.authorize)
 
 	api.log.Infof("initialized API server OAuth2 routes")
 
@@ -76,7 +75,9 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 			bearerToken,
 		)
 
-		// This should look up in a PG db
+		// This should make client.Get call on behalf of client with token,
+		// get sub, then look up in a PG db with sub and check that the tokens
+		// match.
 
 		if bearerToken != "test" {
 			api.log.Infof(errUnauthorized.Error())
@@ -87,9 +88,9 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 	}
 }
 
-// index handles requests to the index ("/").
-func (api *API) index(ctx *gin.Context) {
-
+// home handles requests to the home ("/home").
+func (api *API) home(ctx *gin.Context) {
+	ctx.Writer.Write([]byte("welcome home!"))
 }
 
 // login handles a request to login.
@@ -111,14 +112,14 @@ func (api *API) login(ctx *gin.Context) {
 	gotState := session.Get("state")
 	api.log.Debugf("state: %v", gotState)
 
+	// will returb
 	ctx.Writer.Write([]byte("<html><title>Golang Google</title> <body> <a href='" + api.getLoginURL(state) + "'><button>Login with Google!</button> </a> </body></html>"))
 	// Respond with the URL to "Sign in with Google"
 	// ctx.JSON(http.StatusOK, api.getLoginURL(state))
 }
 
-// authenticate handles a request to authenticate.
-func (api *API) authenticate(ctx *gin.Context) {
-
+// authorize is the Google authorization callback URL.
+func (api *API) authorize(ctx *gin.Context) {
 	api.log.Infof("request to authenticate")
 
 	// Create session to check state validity
@@ -144,6 +145,10 @@ func (api *API) authenticate(ctx *gin.Context) {
 	}
 	api.log.Debugf("transport initiated")
 
+	// The following client logic will also happen in the postgres db lookups,
+	// making calls on behalf of the user to obtain the "sub"
+	// (primary key in the postgres database)
+
 	// Construct the client
 	client := api.oauthConfig.Client(oauth2.NoContext, token)
 
@@ -156,15 +161,15 @@ func (api *API) authenticate(ctx *gin.Context) {
 	defer userinfoReq.Body.Close()
 
 	// Read that information
-	data, err := ioutil.ReadAll(userinfoReq.Body)
+	userinfo, err := ioutil.ReadAll(userinfoReq.Body)
 	if api.check(err, ctx) {
 		return
 	}
-	api.log.Infof("got client data %s", string(data))
+	api.log.Infof("got client data %s", string(userinfo))
 
 	// Parse client data
 	u := user{}
-	err = json.Unmarshal(data, &u)
+	err = json.Unmarshal(userinfo, &u)
 	if api.check(err, ctx) {
 		return
 	}
@@ -182,5 +187,6 @@ func (api *API) authenticate(ctx *gin.Context) {
 	// 	return
 	// }
 
-	ctx.Status(http.StatusOK)
+	// ctx.Status(http.StatusOK) // Do this
+	ctx.JSON(http.StatusOK, u) // Don't do this
 }
