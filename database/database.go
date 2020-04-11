@@ -72,8 +72,9 @@ func (db *Database) CreateSchema() error {
 	db.mux.Lock()
 	defer db.mux.Unlock()
 	for _, model := range []interface{}{
-		(*models.User)(nil),   // Make the users table
-		(*models.Post)(nil)} { // make the posts table
+		(*models.User)(nil), // Make the users table
+		(*models.Post)(nil), // make the posts table
+		(*token)(nil)} {     // make the tokens table
 		err := db.DB.CreateTable(model, nil)
 		if err != nil {
 			return err

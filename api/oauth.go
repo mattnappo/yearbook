@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path"
+	"strconv"
 	"strings"
 
 	"github.com/gin-contrib/sessions"
@@ -173,19 +174,21 @@ func (api *API) authorize(ctx *gin.Context) {
 	if api.check(err, ctx) {
 		return
 	}
-	api.log.Debugf("parsed client %v", u)
+	api.log.Debugf("parsed client info %v", u)
 
-	// next: clean up the client.(anything) code into a different func.
-	// Add the postgress database tokenizing stuff
+	// Insert the token into the database
+	sub, err := strconv.ParseInt(u.Sub, 2, 64)
+	err = api.database.InsertToken(sub, token, u.Email)
+	if api.check(err, ctx) {
+		return
+	}
 
-	// Replace the next few lines with adding uid, email, and token to a postgress database.
-	// Put the exchange token in the cookie
-
-	// session.Set("exchange_token", token)
-	// err = session.Save()
-	// if api.check(err, ctx) {
-	// 	return
-	// }
+	// Store the OAuth2 exchaneg token in a cookie
+	session.Set("google_oauth2_token", token)
+	err = session.Save()
+	if api.check(err, ctx) {
+		return
+	}
 
 	// ctx.Status(http.StatusOK) // Do this
 	ctx.JSON(http.StatusOK, u) // Don't do this
