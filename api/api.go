@@ -3,6 +3,7 @@ package api
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -92,6 +93,19 @@ func newAPI(port int64) (*API, error) {
 
 	api.log.Infof("API server initialization complete")
 	return api, nil
+}
+
+// check checks for an error. Returns true if the request shuold be
+// terminated, false if it shold stay alive.
+func (api *API) check(err error, ctx *gin.Context) bool {
+	if err != nil {
+		api.log.Criticalf(err.Error())
+		ctx.AbortWithStatusJSON( // Respond with the error}
+			http.StatusInternalServerError, gr("", err.Error()),
+		)
+		return true
+	}
+	return false
 }
 
 // initializeRoutes initializes the necessary routes.

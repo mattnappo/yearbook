@@ -9,19 +9,6 @@ import (
 	"github.com/xoreo/yearbook/models"
 )
 
-// check checks for an error. Returns true if the request shuold be
-// terminated, false if it shold stay alive.
-func (api *API) check(err error, ctx *gin.Context) bool {
-	if err != nil {
-		api.log.Criticalf(err.Error())
-		ctx.AbortWithStatusJSON( // Respond with the error}
-			http.StatusInternalServerError, gr("", err.Error()),
-		)
-		return true
-	}
-	return false
-}
-
 // createPost creates a new post.
 func (api *API) createPost(ctx *gin.Context) {
 	api.log.Infof("request to create post")

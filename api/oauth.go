@@ -23,15 +23,15 @@ var errUnauthorized = errors.New("failed to authorize request")
 
 // user is a retrieved and authentiacted user.
 type user struct {
-	Sub           string `json:"sub"`
-	Name          string `json:"name"`
-	GivenName     string `json:"given_name"`
-	FamilyName    string `json:"family_name"`
-	Profile       string `json:"profile"`
-	Picture       string `json:"picture"`
-	Email         string `json:"email"`
-	EmailVerified bool   `json:"email_verified"`
-	Gender        string `json:"gender"`
+	Sub           float64 `json:"sub"`
+	Name          string  `json:"name"`
+	GivenName     string  `json:"given_name"`
+	FamilyName    string  `json:"family_name"`
+	Profile       string  `json:"profile"`
+	Picture       string  `json:"picture"`
+	Email         string  `json:"email"`
+	EmailVerified bool    `json:"email_verified"`
+	Gender        string  `json:"gender"`
 }
 
 // initializeOAuth configures the API's OAuth2 config.
@@ -99,6 +99,7 @@ func (api *API) getUserInfo(token *oauth2.Token) (user, error) {
 // endpoint group.
 func (api *API) authorizeRequest() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		api.log.Infof("running authorization middleware")
 		authHeader := strings.Split(ctx.GetHeader("Authorization"), " ")
 		// Check that the authorization header exists
 		if len(authHeader) <= 0 {
@@ -107,30 +108,36 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 		}
 		// Get the token from the header and put it in an oauth2.Token
 		tokenString := authHeader[1]
-		token := oauth2.Token{AccessToken: tokenString}
+		headerToken := oauth2.Token{AccessToken: tokenString}
 		api.log.Infof("attempting to authorize request with token %s",
 			tokenString,
 		)
 
 		// Get user info to obtain the sub
-		u, err := api.getUserInfo(&token)
+		u, err := api.getUserInfo(&headerToken)
 		if api.check(err, ctx) {
 			return
 		}
-		sub, err := strconv.ParseInt(u.Sub, 2, 64)
+		sub, err := strconv.ParseFloat(u.Sub, 10, 64)
 		if api.check(err, ctx) {
 			return
 		}
 
-		// Query the database to get the token given the sub
-		token, err := api.database.GetToken(sub)
+		// Query the database to get the token, given the sub
+		correctToken, err := api.database.GetToken(sub)
+		if api.check(err, ctx) {
+			return
+		}
+
+		api.log.Debugf("correctToken: %s", correctToken)
+		api.log.Debugf(" headerToken: %s", headerToken.AccessToken)
 
 		// Construct the client to lookup the sub associated with the token
 		// given in the authentication bearer header
 
 		// Check if the token provided in the authorization header equals the
 		// token from the database.
-		if tokenString != token {
+		if tokenString != correctToken {
 			api.log.Infof(errUnauthorized.Error())
 			api.check(errUnauthorized, ctx)
 			return
@@ -203,12 +210,20 @@ func (api *API) authorize(ctx *gin.Context) {
 		return
 	}
 
+	api.log.Debugf("got user info")
+	api.log.Debugf("sub: %s", u.Sub)
+
 	// Insert the token into the database
-	sub, err := strconv.ParseInt(u.Sub, 2, 64)
+	sub, err := strconv.ParseInt(u.Sub, 10, 64)
+	if api.check(err, ctx) {
+		return
+	}
 	err = api.database.InsertToken(sub, token, u.Email)
 	if api.check(err, ctx) {
 		return
 	}
+
+	api.log.Debugf("retrieved access token from database")
 
 	// Store the OAuth2 exchaneg token in a cookie
 	session.Set("google_oauth2_token", token)
