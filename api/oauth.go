@@ -94,19 +94,26 @@ func (api *API) getUserInfo(token *oauth2.Token) (user, error) {
 	return u, nil
 }
 
-// authorizeRequest is used to authorize a request for a certain
-// endpoint group.
+// authorizeRequest is the middleware used to authorize a request for a
+// certain endpoint group.
 func (api *API) authorizeRequest() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		api.log.Infof("running authorization middleware")
-		authHeader := strings.Split(ctx.GetHeader("Authorization"), " ")
+		authHeader := strings.Split(ctx.GetHeader("Authorization"), "bearer")
+		api.log.Debugf("auth header: %v", authHeader)
+		api.log.Debugf("auth header len: %d", len(authHeader))
+		api.log.Debugf("HEADER 1: %s", authHeader[1])
 		// Check that the authorization header exists
-		if len(authHeader) <= 0 {
-			api.check(errors.New("no authorization header"), ctx)
+		if len(authHeader) <= 1 {
+			api.check(
+				errors.New("no authorization header"), ctx,
+				http.StatusUnauthorized,
+			)
 			return
 		}
 		// Get the token from the header and put it in an oauth2.Token
-		tokenString := authHeader[1]
+		// Remove all spaces in the header
+		tokenString := strings.ReplaceAll(authHeader[1], " ", "")
 		headerToken := oauth2.Token{AccessToken: tokenString}
 		api.log.Infof("attempting to authorize request with token %s",
 			tokenString,
@@ -118,6 +125,8 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 			return
 		}
 
+		api.log.Debugf("MAJOR THING U: %v", u)
+
 		// Query the database to get the token, given the sub
 		correctToken, err := api.database.GetToken(u.Sub)
 		if api.check(err, ctx) {
@@ -128,10 +137,11 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 		api.log.Debugf(" headerToken: %s", headerToken.AccessToken)
 
 		// Check if the token provided in the authorization header equals the
-		// token from the database.
+		// token from the database. If an only if this is true will the user
+		// gain authorization.
 		if tokenString != correctToken {
 			api.log.Infof(errUnauthorized.Error())
-			api.check(errUnauthorized, ctx)
+			api.check(errUnauthorized, ctx, http.StatusUnauthorized)
 			return
 		}
 		ctx.Next()

@@ -97,11 +97,22 @@ func newAPI(port int64) (*API, error) {
 
 // check checks for an error. Returns true if the request shuold be
 // terminated, false if it shold stay alive.
-func (api *API) check(err error, ctx *gin.Context) bool {
+func (api *API) check(err error, ctx *gin.Context, status ...int) bool {
 	if err != nil {
-		api.log.Criticalf(err.Error())
+		api.log.Criticalf(err.Error()) // Log the error
+		// Respond with correct status code and error
+		var statusCode int
+		switch len(status) {
+		case 1: // If the user supplied a different status
+			statusCode = status[0]
+			break
+		default:
+			statusCode = http.StatusInternalServerError
+			break
+		}
+
 		ctx.AbortWithStatusJSON( // Respond with the error}
-			http.StatusInternalServerError, gr("", err.Error()),
+			statusCode, gr("", err.Error()),
 		)
 		return true
 	}
