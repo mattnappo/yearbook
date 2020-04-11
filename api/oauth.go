@@ -2,10 +2,12 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"path"
+	"strings"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -14,6 +16,9 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
+
+// errUnauthorized is thrown when a request could not be authorized.
+var errUnauthorized = errors.New("failed to authorize request")
 
 // user is a retrieved and authentiacted user.
 type user struct {
@@ -65,16 +70,17 @@ func (api *API) initializeOAuthRoutes() {
 // endpoint group.
 func (api *API) authorizeRequest() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		session := sessions.Default(ctx)
-		// authHeader := ctx.GetHeader("Authorization")
-		v := session.Get("exchange_token")
-		api.log.Infof("V: %v", v)
-		if v == nil {
-			api.log.Infof("failed to authorize request")
-			ctx.Redirect(
-				http.StatusUnauthorized,
-				path.Join(api.oauthRoot, "login"),
-			)
+		// Get the token from the header
+		bearerToken := strings.Split(ctx.GetHeader("Authorization"), " ")[1]
+		api.log.Infof("attempting to authorize request with token %s",
+			bearerToken,
+		)
+
+		// This should look up in a PG db
+
+		if bearerToken != "test" {
+			api.log.Infof(errUnauthorized.Error())
+			api.check(errUnauthorized, ctx)
 			return
 		}
 		ctx.Next()
