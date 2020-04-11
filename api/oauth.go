@@ -178,9 +178,6 @@ func (api *API) login(ctx *gin.Context) {
 
 	api.log.Debugf("generated random token %s", state)
 
-	gotState := session.Get("state")
-	api.log.Debugf("state: %v", gotState)
-
 	// Will return just url: react app will query for url and render button
 	// on react side (client side)
 	ctx.Writer.Write([]byte("<html><title>Golang Google</title> <body> <a href='" + api.getLoginURL(state) + "'><button>Login with Google!</button> </a> </body></html>"))
@@ -196,16 +193,15 @@ func (api *API) authorize(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	queryState := ctx.Query("state")
 	sessionState := session.Get("state")
-
 	api.log.Debugf("  query state: %s", queryState)
 	api.log.Debugf("session state: %v", sessionState)
-	if queryState != sessionState {
+	if queryState != sessionState { // Compare session and query states
 		api.check(fmt.Errorf("invalid session state: %v", sessionState), ctx)
 		return
 	}
 	api.log.Infof("session is valid")
 
-	// Handle the exchange code to initiate a transport
+	// Handle the exchange code to initiate a transport and get a token
 	token, err := api.oauthConfig.Exchange(
 		oauth2.NoContext,
 		ctx.Query("code"),
@@ -213,16 +209,13 @@ func (api *API) authorize(ctx *gin.Context) {
 	if api.check(err, ctx) {
 		return
 	}
-	api.log.Debugf("transport initiated")
+	api.log.Debugf("transport initiated, fetched token %s", token.AccessToken)
 
-	// Construct the client
+	// Construct the client to get the sub.
 	u, err := api.getUserInfo(token)
 	if api.check(err, ctx) {
 		return
 	}
-
-	api.log.Infof("got user info from Google API")
-	api.log.Debugf("sub: %s", u.Sub)
 
 	// Insert the token into the database
 	err = api.database.InsertToken(u.Sub, token, u.Email)
@@ -230,7 +223,7 @@ func (api *API) authorize(ctx *gin.Context) {
 		return
 	}
 
-	api.log.Debugf("inserted token entry into database")
+	api.log.Infof("inserted token entry into database for email %s", u.Email)
 
 	// Store the OAuth2 exchaneg token in a cookie
 	session.Set("google_oauth2_token", token.AccessToken)

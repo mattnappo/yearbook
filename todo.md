@@ -7,3 +7,4 @@
 7. Docker
 8. Allow for different status in api.check
 12. Routes to allow get to and from posts
+13. Debug the cookie issue of cookies not showing up on the client side in chrome
