@@ -15,8 +15,8 @@ const (
 	hashLength = 32
 
 	// tokenSize is the size (in bytes) of the token for the GenRandomToken()
-	// method
-	tokenSize = 64
+	// method.
+	tokenSize = 16
 )
 
 // Hash represents the streamlined hash type to be used.

@@ -37,12 +37,12 @@ type user struct {
 func (api *API) initializeOAuth() {
 	// Configure the OAuth2 client
 	api.oauthConfig = &oauth2.Config{
-		RedirectURL:  "http://localhost:8080/oauth/callback",
+		RedirectURL:  api.callbackURL,
 		ClientID:     common.GetEnv("GOOGLE_CLIENT_ID"),
 		ClientSecret: common.GetEnv("GOOGLE_CLIENT_SECRET"),
 		Scopes: []string{
 			"https://www.googleapis.com/auth/userinfo.email",
-			"https://www.googleapis.com/auth/userinfo.profile",
+			// "userid",
 		},
 		Endpoint: google.Endpoint,
 	}
@@ -50,20 +50,20 @@ func (api *API) initializeOAuth() {
 	api.initializeOAuthRoutes()
 }
 
-// getLoginURL gets the "Sign in with Google" URL.
-func (api *API) getLoginURL(state string) string {
-	return api.oauthConfig.AuthCodeURL(state)
-}
-
 // initializeOAuthRoutes initializes the OAuth2-related API routes.
 func (api *API) initializeOAuthRoutes() {
 	api.router.GET("/", api.index)
 
 	api.router.GET(path.Join(api.oauthRoot, "login"), api.login)
-	api.router.GET(path.Join(api.oauthRoot, "auth"), api.auth)
+	api.router.GET(path.Join(api.oauthRoot, "authenticate"), api.authenticate)
 
 	api.log.Infof("initialized API server OAuth2 routes")
 
+}
+
+// getLoginURL gets the "Sign in with Google" URL.
+func (api *API) getLoginURL(state string) string {
+	return api.oauthConfig.AuthCodeURL(state)
 }
 
 // authorizeRequest is used to authorize a request for a certain
@@ -108,22 +108,31 @@ func (api *API) login(ctx *gin.Context) {
 
 	api.log.Debugf("generated random token %s", state)
 
+	gotState := session.Get("state")
+	api.log.Debugf("state: %v", gotState)
+
+	ctx.Writer.Write([]byte("<html><title>Golang Google</title> <body> <a href='" + api.getLoginURL(state) + "'><button>Login with Google!</button> </a> </body></html>"))
 	// Respond with the URL to "Sign in with Google"
-	ctx.JSON(http.StatusOK, api.getLoginURL(state))
+	// ctx.JSON(http.StatusOK, api.getLoginURL(state))
 }
 
-// auth handles a request to authenticate.
-func (api *API) auth(ctx *gin.Context) {
+// authenticate handles a request to authenticate.
+func (api *API) authenticate(ctx *gin.Context) {
+
 	api.log.Infof("request to authenticate")
 
-	// Check state validity
+	// Create session to check state validity
 	session := sessions.Default(ctx)
-	retrievedState := session.Get("state")
-	if retrievedState != ctx.Query("state") {
-		api.check(fmt.Errorf("invalid session state: %s", retrievedState), ctx)
+	queryState := ctx.Query("state")
+	sessionState := session.Get("state")
+
+	api.log.Debugf("  query state: %s", queryState)
+	api.log.Debugf("session state: %v", sessionState)
+	if queryState != sessionState {
+		api.check(fmt.Errorf("invalid session state: %v", sessionState), ctx)
 		return
 	}
-	api.log.Debugf("session is valid")
+	api.log.Infof("session is valid")
 
 	// Handle the exchange code to initiate a transport
 	token, err := api.oauthConfig.Exchange(
@@ -140,14 +149,14 @@ func (api *API) auth(ctx *gin.Context) {
 
 	// Query the Google API to get information about the user
 	// Streamline this to use the api.oauthConfig.Scopes field
-	userinfo, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
+	userinfoReq, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
 	if api.check(err, ctx) {
 		return
 	}
-	defer userinfo.Body.Close()
+	defer userinfoReq.Body.Close()
 
 	// Read that information
-	data, err := ioutil.ReadAll(userinfo.Body)
+	data, err := ioutil.ReadAll(userinfoReq.Body)
 	if api.check(err, ctx) {
 		return
 	}
@@ -161,12 +170,17 @@ func (api *API) auth(ctx *gin.Context) {
 	}
 	api.log.Debugf("parsed client %v", u)
 
+	// next: clean up the client.(anything) code into a different func.
+	// Add the postgress database tokenizing stuff
+
+	// Replace the next few lines with adding uid, email, and token to a postgress database.
 	// Put the exchange token in the cookie
-	session.Set("exchange_token", token)
-	err = session.Save()
-	if api.check(err, ctx) {
-		return
-	}
+
+	// session.Set("exchange_token", token)
+	// err = session.Save()
+	// if api.check(err, ctx) {
+	// 	return
+	// }
 
 	ctx.Status(http.StatusOK)
 }

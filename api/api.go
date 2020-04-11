@@ -43,6 +43,7 @@ type API struct {
 	port int64
 
 	oauthConfig *oauth2.Config
+	callbackURL string
 	cookieStore cookie.Store
 }
 
@@ -53,9 +54,11 @@ func newAPI(port int64) (*API, error) {
 	cookieStore := cookie.NewStore(
 		[]byte(common.GetEnv("COOKIE_SECRET")),
 	)
+
 	cookieStore.Options(sessions.Options{
 		Path:   "/",
 		MaxAge: int(defaultSessionTimeout.Seconds()),
+		// Secure: true,
 	})
 
 	// Initialize the router
@@ -73,6 +76,9 @@ func newAPI(port int64) (*API, error) {
 
 		port: port,
 
+		callbackURL: fmt.Sprintf(
+			"http://localhost:%d%s/authenticate", port, defaultOAuthRoot,
+		),
 		cookieStore: cookieStore,
 	}
 
