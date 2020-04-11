@@ -87,7 +87,7 @@ func StartAPIServer(port int64) error {
 		}
 	}(api)
 
-	return api.router.Run("0.0.0.0:" + strconv.FormatInt(port, 10))
+	return api.router.Run(":" + strconv.FormatInt(port, 10))
 }
 
 // shutdown shuts down the API.
