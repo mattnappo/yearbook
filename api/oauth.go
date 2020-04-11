@@ -68,6 +68,7 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 		session := sessions.Default(ctx)
 		// authHeader := ctx.GetHeader("Authorization")
 		v := session.Get("exchange_token")
+		api.log.Infof("V: %v", v)
 		if v == nil {
 			api.log.Infof("failed to authorize request")
 			ctx.Redirect(

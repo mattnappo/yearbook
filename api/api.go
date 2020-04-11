@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"path"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -97,17 +96,16 @@ func (api *API) initializeRoutes() {
 	// Require only authorized requests
 	protectedRoutes.Use(api.authorizeRequest())
 	{
-		protectedRoutes.GET(path.Join(api.root, "createPost"), api.createPost)
-		protectedRoutes.POST(path.Join(api.root, "createPost"), api.createPost)
-		protectedRoutes.GET(path.Join(api.root, "getPost/:id"), api.getPost)
-		protectedRoutes.GET(path.Join(api.root, "getPosts"), api.getPosts)
-		protectedRoutes.GET(path.Join(api.root, "getnPosts/:n"), api.getnPosts)
-		protectedRoutes.DELETE(path.Join(api.root, "deletePost/:id"), api.deletePost)
+		protectedRoutes.POST("createPost", api.createPost)
+		protectedRoutes.GET("getPost/:id", api.getPost)
+		protectedRoutes.GET("getPosts", api.getPosts)
+		protectedRoutes.GET("getnPosts/:n", api.getnPosts)
+		protectedRoutes.DELETE("deletePost/:id", api.deletePost)
 
-		api.router.POST(path.Join(api.root, "createUser"), api.createUser)
-		api.router.GET(path.Join(api.root, "getUser/:username"), api.getUser)
-		api.router.GET(path.Join(api.root, "getUsers"), api.getUsers)
-		api.router.DELETE(path.Join(api.root, "deleteUser/:username"), api.deleteUser)
+		protectedRoutes.POST("createUser", api.createUser)
+		protectedRoutes.GET("getUser/:username", api.getUser)
+		protectedRoutes.GET("getUsers", api.getUsers)
+		protectedRoutes.DELETE("deleteUser/:username", api.deleteUser)
 	}
 
 	api.log.Infof("initialized API server routes")
