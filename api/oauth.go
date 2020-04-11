@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -105,6 +106,7 @@ func (api *API) auth(ctx *gin.Context) {
 	client := api.oauthConfig.Client(oauth2.NoContext, token)
 
 	// Query the Google API to get information about the user
+	// Streamline this to use the api.oauthConfig.Scopes field
 	userinfo, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
 	if api.check(err, ctx) {
 		return
@@ -118,7 +120,19 @@ func (api *API) auth(ctx *gin.Context) {
 	}
 	api.log.Infof("got client data %s", string(data))
 
-	session.Set("user-id", data)
+	// Parse client data
+	u := user{}
+	err = json.Unmarshal(data, &u)
+	if api.check(err, ctx) {
+		return
+	}
+
+	// Put the amil in the cookie
+	session.Set("email", u.Email)
+	err = session.Save()
+	if api.check(err, ctx) {
+		return
+	}
 
 	ctx.Status(http.StatusOK)
 }
