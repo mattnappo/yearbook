@@ -66,8 +66,10 @@ func (api *API) initializeOAuthRoutes() {
 func (api *API) authorizeRequest() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
+		// authHeader := ctx.GetHeader("Authorization")
 		v := session.Get("exchange_token")
 		if v == nil {
+			api.log.Infof("failed to authorize request")
 			ctx.Redirect(
 				http.StatusUnauthorized,
 				path.Join(api.oauthRoot, "login"),
