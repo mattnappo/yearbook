@@ -1,8 +1,11 @@
 package common
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
+
+	"github.com/joho/godotenv"
 )
 
 const (
@@ -24,10 +27,6 @@ const (
 	// DatabaseName is the name of the Postgres database.
 	DatabaseName = "new_tests"
 
-	// PasswordFile is the location of the file containing the Postgres
-	// password.
-	PasswordFile = "./password.pwd"
-
 	// DefaultAPIRoot is the default API root.
 	DefaultAPIRoot = "/api"
 
@@ -45,4 +44,16 @@ func CreateDirIfDoesNotExist(dir string) error {
 		}
 	}
 	return nil
+}
+
+// GetEnv gets an environment variable
+func GetEnv(key string) string {
+	// Load .env file
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		panic(errors.New("could not load .env file"))
+	}
+
+	return os.Getenv(key)
 }

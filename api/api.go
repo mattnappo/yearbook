@@ -15,6 +15,7 @@ import (
 	"github.com/juju/loggo/loggocolor"
 	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/database"
+	"golang.org/x/oauth2"
 )
 
 // API contains the API layer.
@@ -25,6 +26,8 @@ type API struct {
 
 	root string
 	port int64
+
+	oauthConfig *oauth2.Config
 }
 
 // newAPI constructs a new API struct.
@@ -41,15 +44,16 @@ func newAPI(port int64) (*API, error) {
 	if err != nil {
 		return nil, err
 	}
-	api.setupRoutes()
+	api.initializeRoutes()
+	api.initializeOAuth()
 
 	api.log.Infof("API server initialization complete")
 	return api, nil
 }
 
-// setupRoutes initializes the necessary routes.
-func (api *API) setupRoutes() {
-	// Oh boi do I need to clean up this bad boi
+// initializeRoutes initializes the necessary routes.
+func (api *API) initializeRoutes() {
+	api.router.GET(path.Join(api.root, "createPost"), api.createPost)
 	api.router.POST(path.Join(api.root, "createPost"), api.createPost)
 	api.router.GET(path.Join(api.root, "getPost/:id"), api.getPost)
 	api.router.GET(path.Join(api.root, "getPosts"), api.getPosts)

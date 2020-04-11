@@ -1,4 +1,3 @@
 *.swp
 .swp
-*.pwd
-.pwd
+.env

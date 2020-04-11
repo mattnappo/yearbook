@@ -1,15 +1,23 @@
 package crypto
 
-/* sha3.go was adapted from @dowlandaiello */
+/* sha3 code was adapted from @dowlandaiello */
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 
 	"golang.org/x/crypto/sha3"
 )
 
-// hashLength is the standardized length of a hash.
-const hashLength = 32
+const (
+	// hashLength is the standardized length of a hash.
+	hashLength = 32
+
+	// tokenSize is the size (in bytes) of the token for the GenRandomToken()
+	// method
+	tokenSize = 64
+)
 
 // Hash represents the streamlined hash type to be used.
 type Hash [hashLength]byte
@@ -74,4 +82,11 @@ func (hash Hash) String() string {
 // Bytes returns the bytes of the hash.
 func (hash Hash) Bytes() []byte {
 	return hash[:]
+}
+
+// GenRandomToken generates a random token to be stored in the cookie's state.
+func GenRandomToken() string {
+	b := make([]byte, tokenSize) // Or 48
+	rand.Read(b)
+	return base64.StdEncoding.EncodeToString(b)
 }
