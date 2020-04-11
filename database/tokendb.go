@@ -1,27 +1,29 @@
 package database
 
-import "golang.org/x/oauth2"
+import (
+	"golang.org/x/oauth2"
+)
 
 // token describes the schema for the token table.
 type token struct {
-	sub   float64 `pg:",pk"`
-	token string  `pg:",unique"`
-	email string  `pg:",unique"`
+	Sub   string `pg:",pk"`
+	Token string `pg:",notnull,unique"`
+	Email string `pg:",notnull,unique"`
 }
 
 // InsertToken inserts a token into the database.
 func (db *Database) InsertToken(
-	sub float64, oauthToken *oauth2.Token, email ...string,
+	sub string, oauthToken *oauth2.Token, email ...string,
 ) error {
 	db.mux.Lock()
 	defer db.mux.Unlock()
 	// Construct a new *token
 	token := &token{
-		sub:   sub,
-		token: oauthToken.AccessToken,
+		Sub:   sub,
+		Token: oauthToken.AccessToken,
 	}
 	if len(email) > 0 {
-		token.email = email[0]
+		token.Email = email[0]
 	}
 
 	// Put it in the database
@@ -33,6 +35,12 @@ func (db *Database) InsertToken(
 }
 
 // GetToken gets a token in the token table.
-func (db *Database) GetToken(sub int64) (string, error) {
-	return "", nil
+func (db *Database) GetToken(sub string) (string, error) {
+	token := &token{Sub: sub}  // Init the buffer
+	err := db.DB.Select(token) // Select token from database
+	if err != nil {
+		return "", err
+	}
+
+	return token.Token, nil
 }

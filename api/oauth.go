@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path"
-	"strconv"
 	"strings"
 
 	"github.com/gin-contrib/sessions"
@@ -23,15 +22,15 @@ var errUnauthorized = errors.New("failed to authorize request")
 
 // user is a retrieved and authentiacted user.
 type user struct {
-	Sub           float64 `json:"sub"`
-	Name          string  `json:"name"`
-	GivenName     string  `json:"given_name"`
-	FamilyName    string  `json:"family_name"`
-	Profile       string  `json:"profile"`
-	Picture       string  `json:"picture"`
-	Email         string  `json:"email"`
-	EmailVerified bool    `json:"email_verified"`
-	Gender        string  `json:"gender"`
+	Sub           string `json:"sub"`
+	Name          string `json:"name"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
+	Profile       string `json:"profile"`
+	Picture       string `json:"picture"`
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
+	Gender        string `json:"gender"`
 }
 
 // initializeOAuth configures the API's OAuth2 config.
@@ -118,13 +117,9 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 		if api.check(err, ctx) {
 			return
 		}
-		sub, err := strconv.ParseFloat(u.Sub, 10, 64)
-		if api.check(err, ctx) {
-			return
-		}
 
 		// Query the database to get the token, given the sub
-		correctToken, err := api.database.GetToken(sub)
+		correctToken, err := api.database.GetToken(u.Sub)
 		if api.check(err, ctx) {
 			return
 		}
@@ -214,19 +209,22 @@ func (api *API) authorize(ctx *gin.Context) {
 	api.log.Debugf("sub: %s", u.Sub)
 
 	// Insert the token into the database
-	sub, err := strconv.ParseInt(u.Sub, 10, 64)
-	if api.check(err, ctx) {
-		return
-	}
-	err = api.database.InsertToken(sub, token, u.Email)
+	err = api.database.InsertToken(u.Sub, token, u.Email)
 	if api.check(err, ctx) {
 		return
 	}
 
-	api.log.Debugf("retrieved access token from database")
+	api.log.Debugf("inserted token entry into database")
+
+	// TEST CODE
+	checkToken, err := api.database.GetToken(u.Sub)
+	if api.check(err, ctx) {
+		return
+	}
+	api.log.Debugf("checkToken: %s", checkToken)
 
 	// Store the OAuth2 exchaneg token in a cookie
-	session.Set("google_oauth2_token", token)
+	session.Set("google_oauth2_token", token.AccessToken)
 	err = session.Save()
 	if api.check(err, ctx) {
 		return
