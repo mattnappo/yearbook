@@ -27,9 +27,6 @@ const (
 	// DatabaseName is the name of the Postgres database.
 	DatabaseName = "new_tests"
 
-	// DefaultAPIRoot is the default API root.
-	DefaultAPIRoot = "/api"
-
 	// LogsDir is the location where all log files are stored.
 	LogsDir = "./data/logs"
 )

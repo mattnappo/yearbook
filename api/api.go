@@ -18,13 +18,24 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const (
+	// defaultAPIRoot is the default API root.
+	defaultAPIRoot = "/api"
+
+	// defaultOAuthRoot is the default API root for all OAuth2-related
+	// requests.
+	defaultOAuthRoot = "/oauth"
+)
+
 // API contains the API layer.
 type API struct {
 	router   *gin.Engine
 	database *database.Database
 	log      *loggo.Logger
 
-	root string
+	root      string
+	oauthRoot string
+
 	port int64
 
 	oauthConfig *oauth2.Config
@@ -36,8 +47,9 @@ func newAPI(port int64) (*API, error) {
 		router:   gin.New(),
 		database: nil,
 
-		root: common.DefaultAPIRoot,
-		port: port,
+		root:      defaultAPIRoot,
+		oauthRoot: defaultOAuthRoot,
+		port:      port,
 	}
 
 	err := api.initLogger()
