@@ -14,6 +14,19 @@ import (
 	"golang.org/x/oauth2/google"
 )
 
+// user is a retrieved and authentiacted user.
+type user struct {
+	Sub           string `json:"sub"`
+	Name          string `json:"name"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
+	Profile       string `json:"profile"`
+	Picture       string `json:"picture"`
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
+	Gender        string `json:"gender"`
+}
+
 // initializeOAuth configures the API's OAuth2 config.
 func (api *API) initializeOAuth() {
 	// Configure the OAuth2 client
@@ -36,6 +49,7 @@ func (api *API) getLoginURL(state string) string {
 	return api.oauthConfig.AuthCodeURL(state)
 }
 
+// initializeOAuthRoutes initializes the OAuth2-related API routes.
 func (api *API) initializeOAuthRoutes() {
 	api.router.GET(path.Join(api.oauthRoot, "login"), api.login)
 	api.router.GET(path.Join(api.oauthRoot, "auth"), api.auth)
@@ -53,7 +67,10 @@ func (api *API) login(ctx *gin.Context) {
 	state := crypto.GenRandomToken()
 	session := sessions.Default(ctx)
 	session.Set("state", state)
-	session.Save()
+	err := session.Save()
+	if api.check(err, ctx) {
+		return
+	}
 
 	api.log.Debugf("generated random token %s", state)
 
@@ -88,18 +105,20 @@ func (api *API) auth(ctx *gin.Context) {
 	client := api.oauthConfig.Client(oauth2.NoContext, token)
 
 	// Query the Google API to get information about the user
-	res, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
+	userinfo, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
 	if api.check(err, ctx) {
 		return
 	}
-	defer res.Body.Close()
+	defer userinfo.Body.Close()
 
 	// Read that information
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := ioutil.ReadAll(userinfo.Body)
 	if api.check(err, ctx) {
 		return
 	}
-
 	api.log.Infof("got client data %s", string(data))
+
+	session.Set("user-id", data)
+
 	ctx.Status(http.StatusOK)
 }

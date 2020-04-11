@@ -47,9 +47,14 @@ type API struct {
 // newAPI constructs a new API struct.
 func newAPI(port int64) (*API, error) {
 	// Generate the store
+	// Should use common.GenRandomToken
 	cookieStore := cookie.NewStore(
 		[]byte(common.GetEnv("COOKIE_SECRET")),
 	)
+	cookieStore.Options(sessions.Options{
+		Path:   "/",
+		MaxAge: 86400 * 7,
+	})
 
 	// Initialize the router
 	r := gin.New()
