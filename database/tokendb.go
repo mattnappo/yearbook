@@ -4,9 +4,9 @@ import "golang.org/x/oauth2"
 
 // token describes the schema for the token table.
 type token struct {
-	sub   int64  `pg:",pk"`
-	token string `pg:",unique"`
-	email string `pg:",unique"`
+	sub   int64         `pg:",pk"`
+	token *oauth2.Token `pg:",unique"`
+	email string        `pg:",unique"`
 }
 
 // InsertToken inserts a token into the database.

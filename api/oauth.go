@@ -66,15 +66,54 @@ func (api *API) getLoginURL(state string) string {
 	return api.oauthConfig.AuthCodeURL(state)
 }
 
+// getUserInfo querys the Google API to get user info given a token.
+func (api *API) getUserInfo(token *oauth2.Token) (user, error) {
+	api.log.Infof("querying Google API to get userinfo")
+	client := api.oauthConfig.Client(oauth2.NoContext, token)
+
+	// Query the Google API to get information about the user
+	userinfoReq, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
+	if err != nil {
+		return user{}, err
+	}
+	defer userinfoReq.Body.Close()
+
+	// Read that information
+	userinfo, err := ioutil.ReadAll(userinfoReq.Body)
+	if err != nil {
+		return user{}, err
+	}
+	api.log.Infof("got client data %s", string(userinfo))
+
+	// Parse client data
+	u := user{}
+	err = json.Unmarshal(userinfo, &u)
+	if err != nil {
+		return user{}, err
+	}
+	api.log.Debugf("parsed client info %v", u)
+	return u, nil
+}
+
 // authorizeRequest is used to authorize a request for a certain
 // endpoint group.
 func (api *API) authorizeRequest() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// Get the token from the header
-		bearerToken := strings.Split(ctx.GetHeader("Authorization"), " ")[1]
+		authHeader := strings.Split(ctx.GetHeader("Authorization"), " ")
+		// Check that the authorization header exists
+		if len(authHeader) <= 0 {
+			api.check(errors.New("no authorization header"), ctx)
+			return
+		}
+		// Get the token from the header and put it in an oauth2.Token
+		tokenString := authHeader[1]
+		token := oauth2.Token{AccessToken: tokenString}
 		api.log.Infof("attempting to authorize request with token %s",
-			bearerToken,
+			tokenString,
 		)
+
+		// Construct the client to lookup the sub associated with the token
+		// given in the authentication bearer header
 
 		// This should make client.Get call on behalf of client with token,
 		// get sub, then look up in a PG db with sub and check that the tokens
