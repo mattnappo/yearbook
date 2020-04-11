@@ -17,6 +17,6 @@ func (db *Database) InsertToken(
 }
 
 // GetToken gets a token in the token table.
-func (db *Database) GetToken(sub int64) {
+func (db *Database) GetToken(sub int64) (string, error) {
 
 }

@@ -112,14 +112,25 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 			tokenString,
 		)
 
+		// Get user info to obtain the sub
+		u, err := api.getUserInfo(&token)
+		if api.check(err, ctx) {
+			return
+		}
+		sub, err := strconv.ParseInt(u.Sub, 2, 64)
+		if api.check(err, ctx) {
+			return
+		}
+
+		// Query the database to get the token given the sub
+		token, err := api.database.GetToken(sub)
+
 		// Construct the client to lookup the sub associated with the token
 		// given in the authentication bearer header
 
-		// This should make client.Get call on behalf of client with token,
-		// get sub, then look up in a PG db with sub and check that the tokens
-		// match.
-
-		if bearerToken != "test" {
+		// Check if the token provided in the authorization header equals the
+		// token from the database.
+		if tokenString != token {
 			api.log.Infof(errUnauthorized.Error())
 			api.check(errUnauthorized, ctx)
 			return
@@ -152,7 +163,8 @@ func (api *API) login(ctx *gin.Context) {
 	gotState := session.Get("state")
 	api.log.Debugf("state: %v", gotState)
 
-	// will returb
+	// will return just url: react app will query for url and render button
+	// on react side (client side)
 	ctx.Writer.Write([]byte("<html><title>Golang Google</title> <body> <a href='" + api.getLoginURL(state) + "'><button>Login with Google!</button> </a> </body></html>"))
 	// Respond with the URL to "Sign in with Google"
 	// ctx.JSON(http.StatusOK, api.getLoginURL(state))
@@ -185,35 +197,11 @@ func (api *API) authorize(ctx *gin.Context) {
 	}
 	api.log.Debugf("transport initiated")
 
-	// The following client logic will also happen in the postgres db lookups,
-	// making calls on behalf of the user to obtain the "sub"
-	// (primary key in the postgres database)
-
 	// Construct the client
-	client := api.oauthConfig.Client(oauth2.NoContext, token)
-
-	// Query the Google API to get information about the user
-	// Streamline this to use the api.oauthConfig.Scopes field
-	userinfoReq, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
+	u, err := api.getUserInfo(token)
 	if api.check(err, ctx) {
 		return
 	}
-	defer userinfoReq.Body.Close()
-
-	// Read that information
-	userinfo, err := ioutil.ReadAll(userinfoReq.Body)
-	if api.check(err, ctx) {
-		return
-	}
-	api.log.Infof("got client data %s", string(userinfo))
-
-	// Parse client data
-	u := user{}
-	err = json.Unmarshal(userinfo, &u)
-	if api.check(err, ctx) {
-		return
-	}
-	api.log.Debugf("parsed client info %v", u)
 
 	// Insert the token into the database
 	sub, err := strconv.ParseInt(u.Sub, 2, 64)
