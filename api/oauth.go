@@ -127,9 +127,6 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 		api.log.Debugf("correctToken: %s", correctToken)
 		api.log.Debugf(" headerToken: %s", headerToken.AccessToken)
 
-		// Construct the client to lookup the sub associated with the token
-		// given in the authentication bearer header
-
 		// Check if the token provided in the authorization header equals the
 		// token from the database.
 		if tokenString != correctToken {
@@ -151,7 +148,6 @@ func (api *API) login(ctx *gin.Context) {
 	api.log.Infof("request to login")
 
 	// Generate a random token for the cookie session handler
-	// Encrypt this cookie later
 	state := crypto.GenRandomToken()
 	session := sessions.Default(ctx)
 	session.Set("state", state)
@@ -205,7 +201,7 @@ func (api *API) authorize(ctx *gin.Context) {
 		return
 	}
 
-	api.log.Debugf("got user info")
+	api.log.Infof("got user info from Google API")
 	api.log.Debugf("sub: %s", u.Sub)
 
 	// Insert the token into the database
@@ -216,14 +212,6 @@ func (api *API) authorize(ctx *gin.Context) {
 
 	api.log.Debugf("inserted token entry into database")
 
-	// TEST CODE
-	checkToken, err := api.database.GetToken(u.Sub)
-	if api.check(err, ctx) {
-		return
-	}
-	api.log.Debugf("actualToken: %s", token.AccessToken)
-	api.log.Debugf(" checkToken: %s", checkToken)
-
 	// Store the OAuth2 exchaneg token in a cookie
 	session.Set("google_oauth2_token", token.AccessToken)
 	err = session.Save()
@@ -232,5 +220,5 @@ func (api *API) authorize(ctx *gin.Context) {
 	}
 
 	// ctx.Status(http.StatusOK) // Do this
-	ctx.JSON(http.StatusOK, u) // Don't do this
+	ctx.JSON(http.StatusOK, token.AccessToken) // Absolutely don't do this
 }
