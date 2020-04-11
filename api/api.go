@@ -27,6 +27,9 @@ const (
 	// defaultOAuthRoot is the default API root for all OAuth2-related
 	// requests.
 	defaultOAuthRoot = "/oauth"
+
+	// defaultSessionTimeout represenst the expiration time of a session cookie.
+	defaultSessionTimeout = time.Minute * 30
 )
 
 // API contains the API layer.
@@ -53,7 +56,7 @@ func newAPI(port int64) (*API, error) {
 	)
 	cookieStore.Options(sessions.Options{
 		Path:   "/",
-		MaxAge: 86400 * 7,
+		MaxAge: int(defaultSessionTimeout.Seconds()),
 	})
 
 	// Initialize the router

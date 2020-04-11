@@ -6,3 +6,5 @@
 6. Traefik integration
 7. Docker
 8. Allow for different status in api.check 
+9. Don't just use the user email for request authorization
+10. Specs streamlining

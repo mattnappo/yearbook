@@ -66,7 +66,7 @@ func (api *API) initializeOAuthRoutes() {
 func (api *API) authorizeRequest() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		session := sessions.Default(ctx)
-		v := session.Get("user-id")
+		v := session.Get("exchange_token")
 		if v == nil {
 			ctx.Redirect(
 				http.StatusUnauthorized,
@@ -150,9 +150,10 @@ func (api *API) auth(ctx *gin.Context) {
 	if api.check(err, ctx) {
 		return
 	}
+	api.log.Debugf("parsed client %v", u)
 
-	// Put the amil in the cookie
-	session.Set("email", u.Email)
+	// Put the exchange token in the cookie
+	session.Set("exchange_token", token)
 	err = session.Save()
 	if api.check(err, ctx) {
 		return
