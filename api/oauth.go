@@ -90,8 +90,25 @@ func (api *API) getUserInfo(token *oauth2.Token) (user, error) {
 	if err != nil {
 		return user{}, err
 	}
+
+	// Check that there were no errors
+	if u.Sub == "" {
+		return user{}, errors.New("invalid credentials to query Google API")
+	}
+
 	api.log.Debugf("parsed client info %v", u)
 	return u, nil
+}
+
+// extractBearerToken extracts the bearer token from a *gin.Context.
+func extractBearerToken(ctx *gin.Context) (string, error) {
+	authHeader := strings.Split(ctx.GetHeader("Authorization"), "bearer")
+	// Check that the authorization header exists
+	if len(authHeader) <= 1 {
+		return "", errors.New("no authorization header")
+	}
+	// Remove all spaces from the parsed auth header
+	return strings.ReplaceAll(authHeader[1], " ", ""), nil
 }
 
 // authorizeRequest is the middleware used to authorize a request for a
@@ -99,24 +116,20 @@ func (api *API) getUserInfo(token *oauth2.Token) (user, error) {
 func (api *API) authorizeRequest() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		api.log.Infof("running authorization middleware")
-		authHeader := strings.Split(ctx.GetHeader("Authorization"), "bearer")
-		api.log.Debugf("auth header: %v", authHeader)
-		api.log.Debugf("auth header len: %d", len(authHeader))
-		api.log.Debugf("HEADER 1: %s", authHeader[1])
-		// Check that the authorization header exists
-		if len(authHeader) <= 1 {
-			api.check(
-				errors.New("no authorization header"), ctx,
-				http.StatusUnauthorized,
-			)
+		// Extract the bearer token
+		headerTokenString, err := extractBearerToken(ctx)
+		if api.check(err, ctx, http.StatusUnauthorized) {
 			return
 		}
-		// Get the token from the header and put it in an oauth2.Token
-		// Remove all spaces in the header
-		tokenString := strings.ReplaceAll(authHeader[1], " ", "")
-		headerToken := oauth2.Token{AccessToken: tokenString}
+
+		// Construct the actual token which is needed to get the correct
+		// token from the database because with this "headerToken" can a
+		// connection with the Google API be established. This connection
+		// is how we obtain the sub, which is then used to lookup the
+		// correct token in the Postgres database.
+		headerToken := oauth2.Token{AccessToken: headerTokenString}
 		api.log.Infof("attempting to authorize request with token %s",
-			tokenString,
+			headerTokenString,
 		)
 
 		// Get user info to obtain the sub
@@ -124,9 +137,6 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 		if api.check(err, ctx) {
 			return
 		}
-
-		api.log.Debugf("MAJOR THING U: %v", u)
-
 		// Query the database to get the token, given the sub
 		correctToken, err := api.database.GetToken(u.Sub)
 		if api.check(err, ctx) {
@@ -138,8 +148,8 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 
 		// Check if the token provided in the authorization header equals the
 		// token from the database. If an only if this is true will the user
-		// gain authorization.
-		if tokenString != correctToken {
+		// gain authorization to the protected resources.
+		if headerTokenString != correctToken {
 			api.log.Infof(errUnauthorized.Error())
 			api.check(errUnauthorized, ctx, http.StatusUnauthorized)
 			return
@@ -171,11 +181,11 @@ func (api *API) login(ctx *gin.Context) {
 	gotState := session.Get("state")
 	api.log.Debugf("state: %v", gotState)
 
-	// will return just url: react app will query for url and render button
+	// Will return just url: react app will query for url and render button
 	// on react side (client side)
 	ctx.Writer.Write([]byte("<html><title>Golang Google</title> <body> <a href='" + api.getLoginURL(state) + "'><button>Login with Google!</button> </a> </body></html>"))
 	// Respond with the URL to "Sign in with Google"
-	// ctx.JSON(http.StatusOK, api.getLoginURL(state))
+	// ctx.JSON(http.StatusOK, api.getLoginURL(state)) // Should do this later
 }
 
 // authorize is the Google authorization callback URL.
