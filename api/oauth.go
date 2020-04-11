@@ -52,10 +52,34 @@ func (api *API) getLoginURL(state string) string {
 
 // initializeOAuthRoutes initializes the OAuth2-related API routes.
 func (api *API) initializeOAuthRoutes() {
+	api.router.GET("/", api.index)
+
 	api.router.GET(path.Join(api.oauthRoot, "login"), api.login)
 	api.router.GET(path.Join(api.oauthRoot, "auth"), api.auth)
 
 	api.log.Infof("initialized API server OAuth2 routes")
+
+}
+
+// authorizeRequest is used to authorize a request for a certain
+// endpoint group.
+func (api *API) authorizeRequest() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		session := sessions.Default(ctx)
+		v := session.Get("user-id")
+		if v == nil {
+			ctx.Redirect(
+				http.StatusUnauthorized,
+				path.Join(api.oauthRoot, "login"),
+			)
+			return
+		}
+		ctx.Next()
+	}
+}
+
+// index handles requests to the index ("/").
+func (api *API) index(ctx *gin.Context) {
 
 }
 

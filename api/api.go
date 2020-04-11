@@ -88,17 +88,24 @@ func newAPI(port int64) (*API, error) {
 
 // initializeRoutes initializes the necessary routes.
 func (api *API) initializeRoutes() {
-	api.router.GET(path.Join(api.root, "createPost"), api.createPost)
-	api.router.POST(path.Join(api.root, "createPost"), api.createPost)
-	api.router.GET(path.Join(api.root, "getPost/:id"), api.getPost)
-	api.router.GET(path.Join(api.root, "getPosts"), api.getPosts)
-	api.router.GET(path.Join(api.root, "getnPosts/:n"), api.getnPosts)
-	api.router.DELETE(path.Join(api.root, "deletePost/:id"), api.deletePost)
+	// Create a group of protected routes (the main api routes)
+	protectedRoutes := api.router.Group(api.root)
 
-	api.router.POST(path.Join(api.root, "createUser"), api.createUser)
-	api.router.GET(path.Join(api.root, "getUser/:username"), api.getUser)
-	api.router.GET(path.Join(api.root, "getUsers"), api.getUsers)
-	api.router.DELETE(path.Join(api.root, "deleteUser/:username"), api.deleteUser)
+	// Require only authorized requests
+	protectedRoutes.Use(api.authorizeRequest())
+	{
+		protectedRoutes.GET(path.Join(api.root, "createPost"), api.createPost)
+		protectedRoutes.POST(path.Join(api.root, "createPost"), api.createPost)
+		protectedRoutes.GET(path.Join(api.root, "getPost/:id"), api.getPost)
+		protectedRoutes.GET(path.Join(api.root, "getPosts"), api.getPosts)
+		protectedRoutes.GET(path.Join(api.root, "getnPosts/:n"), api.getnPosts)
+		protectedRoutes.DELETE(path.Join(api.root, "deletePost/:id"), api.deletePost)
+
+		api.router.POST(path.Join(api.root, "createUser"), api.createUser)
+		api.router.GET(path.Join(api.root, "getUser/:username"), api.getUser)
+		api.router.GET(path.Join(api.root, "getUsers"), api.getUsers)
+		api.router.DELETE(path.Join(api.root, "deleteUser/:username"), api.deleteUser)
+	}
 
 	api.log.Infof("initialized API server routes")
 }
