@@ -178,11 +178,8 @@ func (api *API) login(ctx *gin.Context) {
 
 	api.log.Debugf("generated random token %s", state)
 
-	// Will return just url: react app will query for url and render button
-	// on react side (client side)
-	ctx.Writer.Write([]byte("<html><title>Golang Google</title> <body> <a href='" + api.getLoginURL(state) + "'><button>Login with Google!</button> </a> </body></html>"))
 	// Respond with the URL to "Sign in with Google"
-	// ctx.JSON(http.StatusOK, api.getLoginURL(state)) // Should do this later
+	ctx.JSON(http.StatusOK, api.getLoginURL(state))
 }
 
 // authorize is the Google authorization callback URL.
