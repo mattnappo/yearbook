@@ -54,7 +54,7 @@ func (api *API) initializeOAuthRoutes() {
 	api.router.GET("/home", api.home)
 
 	api.router.GET(path.Join(api.oauthRoot, "login"), api.login)
-	api.router.GET(path.Join(api.oauthRoot, "authorize"), api.authorize)
+	api.router.POST(path.Join(api.oauthRoot, "authorize"), api.authorize)
 
 	api.log.Infof("initialized API server OAuth2 routes")
 
@@ -169,10 +169,19 @@ func (api *API) login(ctx *gin.Context) {
 
 	// Generate a random token for the cookie session handler
 	state := crypto.GenRandomToken()
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:   "state",
+		Value:  state,
+		Path:   "/",
+		MaxAge: 30 * 60,
+		Secure: false,
+	})
+
+	// Store the state in a session (still dont know where this is)
 	session := sessions.Default(ctx)
 	session.Set("state", state)
 	err := session.Save()
-	if api.check(err, ctx) {
+	if api.check(err, ctx, http.StatusUnauthorized) {
 		return
 	}
 
@@ -186,24 +195,52 @@ func (api *API) login(ctx *gin.Context) {
 func (api *API) authorize(ctx *gin.Context) {
 	api.log.Infof("request to authenticate")
 
-	// Create session to check state validity
+	// Decode the request
+	var request authorizeRequest
+	err := ctx.ShouldBindJSON(&request)
+	if api.check(err, ctx) {
+		return
+	}
+
+	// Get the state from the client-side cookie
+	queryState, err := ctx.Request.Cookie("state")
+	if api.check(err, ctx, http.StatusUnauthorized) {
+		return
+	}
+
+	// Create session to check back-end state
 	session := sessions.Default(ctx)
-	queryState := ctx.Query("state")
 	sessionState := session.Get("state")
-	api.log.Debugf("  query state: %s", queryState)
+
+	api.log.Debugf("  query state: %s", queryState.Value)
 	api.log.Debugf("session state: %v", sessionState)
-	if queryState != sessionState { // Compare session and query states
-		api.check(fmt.Errorf("invalid session state: %v", sessionState), ctx)
+
+	// Compare the two states
+	if queryState.Value != sessionState { // Compare session and query states
+		api.check(fmt.Errorf("invalid query state: %v", queryState.Value),
+			ctx, http.StatusUnauthorized)
 		return
 	}
 	api.log.Infof("session is valid")
 
+	// If they have a token, don't issue a new one
+	_, err = ctx.Request.Cookie("token")
+	if err == nil {
+		// Maybe search PG database to see if its valid
+		api.log.Infof("client has token")
+		ctx.JSON(http.StatusOK, gr(""))
+		return
+	}
+
+	api.log.Infof("must fetch new token")
+
 	// Handle the exchange code to initiate a transport and get a token
 	token, err := api.oauthConfig.Exchange(
 		oauth2.NoContext,
-		ctx.Query("code"),
+		request.Code,
 	)
 	if api.check(err, ctx) {
+		api.log.Criticalf("I AM THE BAD BOI")
 		return
 	}
 	api.log.Debugf("transport initiated, fetched token %s", token.AccessToken)
@@ -222,13 +259,15 @@ func (api *API) authorize(ctx *gin.Context) {
 
 	api.log.Infof("inserted token entry into database for email %s", u.Email)
 
-	// Store the OAuth2 exchaneg token in a cookie
-	session.Set("google_oauth2_token", token.AccessToken)
-	err = session.Save()
-	if api.check(err, ctx) {
-		return
-	}
+	// Set the token in a cookie
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:   "token",
+		Value:  token.AccessToken,
+		Path:   "/",
+		MaxAge: 30 * 60,
+		Secure: false,
+	})
 
-	// ctx.Status(http.StatusOK) // Do this
-	ctx.JSON(http.StatusOK, token.AccessToken) // Absolutely don't do this
+	ctx.JSON(http.StatusOK, gr("")) // Do this
+	// ctx.JSON(http.StatusOK, token.AccessToken) // Absolutely don't do this
 }

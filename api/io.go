@@ -13,10 +13,21 @@ type createPostRequest struct {
 	Images     []string `json:"images"`     // Slice of images in base64
 }
 
+type authorizeRequest struct {
+	Code  string `json:"code"`
+	State string `json:"state"`
+}
+
 // genericResponse represents a generic response.
 type genericResponse struct {
 	Data   interface{} `json:"data"`
 	Errors []string    `json:"errors"`
+}
+
+// loginResponse is the response of a request to /login.
+type loginResponse struct {
+	Link  string `json:"link"`
+	State string `json:"state"`
 }
 
 // gr constructs a new genericResponse.

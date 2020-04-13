@@ -78,7 +78,7 @@ func newAPI(port int64) (*API, error) {
 		port: port,
 
 		callbackURL: fmt.Sprintf(
-			"http://localhost:%d%s/authorize", port, defaultOAuthRoot,
+			"http://localhost:%d/app", 3000,
 		),
 		cookieStore: cookieStore,
 	}

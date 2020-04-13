@@ -6,6 +6,10 @@
  * Better SQL-injection protection (? instances)
  * Docker / k8
  * Allow only masters emails
+ * Should the backend send the token as a response?
+ * HTTPS w/ Let's Encrypt OR Cloudflare
+ * Scale backend sessions (PG? Redis?)
+ * Implement refresh tokens
 
 ## Features
  * DB & API methods to get all posts from a person, a posts to a person
