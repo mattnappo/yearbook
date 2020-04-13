@@ -1,26 +1,13 @@
 package api
 
 import (
-	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xoreo/yearbook/models"
 )
-
-// check checks for an error. Returns true if the request shuold be
-// terminated, false if it shold stay alive.
-func (api *API) check(err error, ctx *gin.Context) bool {
-	if err != nil {
-		api.log.Criticalf(err.Error())
-		ctx.JSON( // Respond with the error
-			http.StatusInternalServerError, gr("", err.Error()),
-		)
-		return true
-	}
-	return false
-}
 
 // createPost creates a new post.
 func (api *API) createPost(ctx *gin.Context) {
@@ -143,9 +130,8 @@ func (api *API) createUser(ctx *gin.Context) {
 		grade = models.Senior
 		break
 	default:
-		if api.check(errors.New("invalid grade"), ctx) {
-			return
-		}
+		api.check(fmt.Errorf("invalid grade %v", request.Grade), ctx)
+		return
 	}
 
 	// Create the new user

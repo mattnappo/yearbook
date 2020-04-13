@@ -3,18 +3,33 @@ package api
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
-	"path"
 	"path/filepath"
 	"strconv"
 	"time"
 
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/juju/loggo"
 	"github.com/juju/loggo/loggocolor"
 	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/database"
+	"golang.org/x/oauth2"
+)
+
+const (
+	// defaultAPIRoot is the default API root.
+	defaultAPIRoot = "/api"
+
+	// defaultOAuthRoot is the default API root for all OAuth2-related
+	// requests.
+	defaultOAuthRoot = "/oauth"
+
+	// defaultSessionTimeout represenst the expiration time of a session cookie.
+	defaultSessionTimeout = time.Minute * 30
 )
 
 // API contains the API layer.
@@ -23,43 +38,106 @@ type API struct {
 	database *database.Database
 	log      *loggo.Logger
 
-	root string
+	root      string
+	oauthRoot string
+
 	port int64
+
+	oauthConfig *oauth2.Config
+	callbackURL string
+	cookieStore cookie.Store
 }
 
 // newAPI constructs a new API struct.
 func newAPI(port int64) (*API, error) {
+	// Generate the store
+	// Should use common.GenRandomToken
+	cookieStore := cookie.NewStore(
+		[]byte(common.GetEnv("COOKIE_SECRET")),
+	)
+
+	cookieStore.Options(sessions.Options{
+		Path:   "/",
+		MaxAge: int(defaultSessionTimeout.Seconds()),
+		// Secure: true,
+	})
+
+	// Initialize the router
+	r := gin.New()
+	r.Use(sessions.Sessions("go_session", cookieStore))
+	r.Use(gin.Recovery())
+
+	// Construct the API
 	api := &API{
-		router:   gin.New(),
+		router:   r,
 		database: nil,
 
-		root: common.DefaultAPIRoot,
+		root:      defaultAPIRoot,
+		oauthRoot: defaultOAuthRoot,
+
 		port: port,
+
+		callbackURL: fmt.Sprintf(
+			"http://localhost:%d%s/authorize", port, defaultOAuthRoot,
+		),
+		cookieStore: cookieStore,
 	}
 
+	// Setup the logger
 	err := api.initLogger()
 	if err != nil {
 		return nil, err
 	}
-	api.setupRoutes()
+	api.initializeRoutes()
+	api.initializeOAuth()
 
 	api.log.Infof("API server initialization complete")
 	return api, nil
 }
 
-// setupRoutes initializes the necessary routes.
-func (api *API) setupRoutes() {
-	// Oh boi do I need to clean up this bad boi
-	api.router.POST(path.Join(api.root, "createPost"), api.createPost)
-	api.router.GET(path.Join(api.root, "getPost/:id"), api.getPost)
-	api.router.GET(path.Join(api.root, "getPosts"), api.getPosts)
-	api.router.GET(path.Join(api.root, "getnPosts/:n"), api.getnPosts)
-	api.router.DELETE(path.Join(api.root, "deletePost/:id"), api.deletePost)
+// check checks for an error. Returns true if the request shuold be
+// terminated, false if it shold stay alive.
+func (api *API) check(err error, ctx *gin.Context, status ...int) bool {
+	if err != nil {
+		api.log.Criticalf(err.Error()) // Log the error
+		// Respond with correct status code and error
+		var statusCode int
+		switch len(status) {
+		case 1: // If the user supplied a different status
+			statusCode = status[0]
+			break
+		default:
+			statusCode = http.StatusInternalServerError
+			break
+		}
 
-	api.router.POST(path.Join(api.root, "createUser"), api.createUser)
-	api.router.GET(path.Join(api.root, "getUser/:username"), api.getUser)
-	api.router.GET(path.Join(api.root, "getUsers"), api.getUsers)
-	api.router.DELETE(path.Join(api.root, "deleteUser/:username"), api.deleteUser)
+		ctx.AbortWithStatusJSON( // Respond with the error}
+			statusCode, gr("", err.Error()),
+		)
+		return true
+	}
+	return false
+}
+
+// initializeRoutes initializes the necessary routes.
+func (api *API) initializeRoutes() {
+	// Create a group of protected routes (the main api routes)
+	protectedRoutes := api.router.Group(api.root)
+
+	// Require only authorized requests
+	protectedRoutes.Use(api.authorizeRequest())
+	{
+		protectedRoutes.POST("createPost", api.createPost)
+		protectedRoutes.GET("getPost/:id", api.getPost)
+		protectedRoutes.GET("getPosts", api.getPosts)
+		protectedRoutes.GET("getnPosts/:n", api.getnPosts)
+		protectedRoutes.DELETE("deletePost/:id", api.deletePost)
+
+		protectedRoutes.POST("createUser", api.createUser)
+		protectedRoutes.GET("getUser/:username", api.getUser)
+		protectedRoutes.GET("getUsers", api.getUsers)
+		protectedRoutes.DELETE("deleteUser/:username", api.deleteUser)
+	}
 
 	api.log.Infof("initialized API server routes")
 }
@@ -87,7 +165,7 @@ func StartAPIServer(port int64) error {
 		}
 	}(api)
 
-	return api.router.Run("0.0.0.0:" + strconv.FormatInt(port, 10))
+	return api.router.Run(":" + strconv.FormatInt(port, 10))
 }
 
 // shutdown shuts down the API.

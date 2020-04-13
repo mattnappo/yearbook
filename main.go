@@ -10,7 +10,7 @@ import (
 
 var (
 	createSchemaFlag = flag.Bool("create-schema", false, "create the database schema")
-	startAPIFlag     = flag.Bool("start-api", false, "start the API server")
+	apiPort          = flag.Int64("start-api", 8080, "start the API server on a given port")
 )
 
 func main() {
@@ -23,8 +23,8 @@ func main() {
 		fmt.Println("created schema")
 	}
 
-	if *startAPIFlag {
-		err := api.StartAPIServer(8081)
+	if *apiPort > 0 {
+		err := api.StartAPIServer(*apiPort)
 		if err != nil {
 			panic(err)
 		}
