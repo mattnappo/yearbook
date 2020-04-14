@@ -154,6 +154,7 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 			api.check(errUnauthorized, ctx, http.StatusUnauthorized)
 			return
 		}
+		api.log.Infof("authorized request")
 		ctx.Next()
 	}
 }

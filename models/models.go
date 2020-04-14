@@ -49,15 +49,15 @@ type User struct {
 
 // Post represents a post in the database.
 type Post struct {
-	ID     int32  `pg:",pk"`
-	PostID string `pg:",notnull,unique"`
+	ID     int32  `pg:",pk" json:"id"`
+	PostID string `pg:",notnull,unique" json:"post_id"`
 
-	Timestamp  time.Time  `pg:",notnull"`
-	Sender     Username   `pg:",notnull"`
-	Recipients []Username `pg:",notnull"`
+	Timestamp  time.Time  `pg:",notnull" json:"timestamp"`
+	Sender     Username   `pg:",notnull" json:"sender"`
+	Recipients []Username `pg:",notnull" json:"recipients"`
 
-	Message string  `pg:",notnull"`
-	Images  []image `pg:",array"`
+	Message string  `pg:",notnull" json:"message"`
+	Images  []image `pg:",array" json:"images"`
 }
 
 // NewUser creates a *User given a valid email and grade.
