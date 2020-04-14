@@ -68,6 +68,9 @@ func (db *Database) AddUser(user *models.User) error {
 	return nil
 }
 
+// UpdateUser updates a user with the given new values in a user struct.
+func (db *Database) UpdateUser(newValue interface{}, user *models.User) error { return nil }
+
 // GetUser gets a user from the database.
 func (db *Database) GetUser(username string) (models.User, error) {
 	user := &models.User{}
