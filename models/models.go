@@ -37,13 +37,19 @@ const (
 
 // User represents a user.
 type User struct {
-	ID       int32    `pg:",pk"`
-	Username Username `pg:",notnull,unique"`
+	ID       int32    `pg:",pk" json:"id"`
+	Username Username `pg:",notnull,unique" json:"username"`
 
-	Firstname    string    `pg:",notnull"`
-	Lastname     string    `pg:",notnull"`
-	Email        string    `pg:",notnull,unique"`
-	Grade        Grade     `pg:",use_zero"`
+	Firstname  string `pg:",notnull" json:"firstname"`
+	Lastname   string `pg:",notnull" json:"lastname"`
+	Email      string `pg:",notnull,unique" json:"email"`
+	Nickname   string `json:"nickname"`
+	Grade      Grade  `pg:",use_zero" json:"grade"`
+	ProfilePic []byte `pg:",notnull" json:"profile_pic"`
+
+	Bio  string `json:"bio"`
+	Will string `json:"will"`
+
 	RegisterDate time.Time `pg:",notnull"`
 }
 

@@ -6,10 +6,10 @@
  * Better SQL-injection protection (? instances)
  * Docker / k8
  * Allow only masters emails
- * Should the backend send the token as a response?
  * HTTPS w/ Let's Encrypt OR Cloudflare
  * Scale backend sessions (PG? Redis?)
  * Implement refresh tokens
+ * Have the backend handle routing
 
 ## Features
  * DB & API methods to get all posts from a person, a posts to a person
@@ -18,6 +18,5 @@
  * Search accounts
 
 ## Bugs
- * Debug the cookie issue of cookies not showing up on the client side in chrome
  * Better error checking in Google API call function from google.
  * Add "registered" tag and create un-established users on post create with registered = false. Set registered = true when registering happens.
