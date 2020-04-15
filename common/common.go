@@ -31,7 +31,7 @@ const (
 	LogsDir = "./data/logs"
 
 	// envFile is the path to the file containing needed environment variables.
-	envFile = "../.env"
+	envFile = "./.env"
 )
 
 // CreateDirIfDoesNotExist creates a directory if it does not already exist.

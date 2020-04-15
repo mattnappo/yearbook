@@ -51,6 +51,7 @@ type User struct {
 	ProfilePic []byte `json:"profile_pic"`
 	Bio        string `json:"bio"`
 	Will       string `json:"will"`
+	Created    bool   `json:"created"` // Is the account actually owned?
 }
 
 // Post represents a post in the database.

@@ -104,14 +104,7 @@ func TestUpdateUser(t *testing.T) {
 	db := Connect(false)
 	defer db.Disconnect()
 
-	// user, err := models.NewUser("epic.man@mastersny.org", models.Sophomore)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
-	// err = db.AddUser(user)
-	// if err != nil {
-	// 	t.Fatal(err)
-	// }
+	// models.NewUser("epic.man@mastersny.org", models.Sophomore)
 
 	newUserData := &models.User{
 		Username: "epic.man",

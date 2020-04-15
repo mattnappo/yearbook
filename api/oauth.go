@@ -286,6 +286,14 @@ func (api *API) authorize(ctx *gin.Context) {
 		return
 	}
 
+	// Insert the sender user into the database (if it does not already exist)
+	newUser, err := models.NewUser(u.Email, models.Freshman)
+	if api.check(err, ctx) {
+		return
+	}
+	// HANDLE THE ERROR ONE WAY OR ANOTHER
+	api.database.AddUser(newUser)
+
 	api.log.Infof("inserted token entry into database for email %s", u.Email)
 
 	// Set the token in a cookie
