@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/crypto"
+	"github.com/xoreo/yearbook/models"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -157,6 +158,33 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 		api.log.Infof("authorized request")
 		ctx.Next()
 	}
+}
+
+// authenticate authenticates a username and a given token.
+func (api *API) authenticate(ctx *gin.Context, username string) error {
+	errNoAuthentication := fmt.Errorf("authentication for %s failed", username)
+
+	// Get the token from the Authorization bearer header
+	bearerToken, err := extractBearerToken(ctx)
+	if err != nil {
+		return errNoAuthentication
+	}
+
+	// Query the Google API to get the email associated with the token
+	// in the request header.
+	headerToken := &oauth2.Token{AccessToken: bearerToken}
+	googleUser, err := api.getUserInfo(headerToken)
+	if err != nil {
+		return errNoAuthentication
+	}
+
+	// Get the username of the email responded by the Google API
+	googleUsername, err := models.UsernameFromEmail(googleUser.Email)
+	if string(googleUsername) != username {
+		return errNoAuthentication
+	}
+
+	return nil
 }
 
 // home handles requests to the home ("/home").

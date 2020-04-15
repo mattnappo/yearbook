@@ -10,6 +10,7 @@
  * Scale backend sessions (PG? Redis?)
  * Implement refresh tokens
  * Have the backend handle routing
+ * Should getUserInfo also check the token DB?
 
 ## Features
  * DB & API methods to get all posts from a person, a posts to a person

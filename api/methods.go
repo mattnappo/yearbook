@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/xoreo/yearbook/models"
-	"golang.org/x/oauth2"
 )
 
 // createPost creates a new post.
@@ -171,20 +170,11 @@ func (api *API) updateUser(ctx *gin.Context) {
 	}
 
 	// Check that the username of the request is the same as the username
-	// of the account being modified.
-	bearerToken, err := extractBearerToken(ctx)
+	// of the account attempting to be modified via this request.
+	err = api.authenticate(ctx, newUserData.Username)
 	if api.check(err, ctx, http.StatusUnauthorized) {
 		return
 	}
-
-	// Query the Google API to get the email associated with the token
-	// in the request header.
-	headerToken := &oauth2.Token{AccessToken: bearerToken}
-	googleUser, err := api.getUserInfo(headerToken)
-	if api.check(err, ctx, http.StatusUnauthorized) {
-		return
-	}
-
 	// Marshal the request data into a new models.user
 }
 
