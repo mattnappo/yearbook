@@ -1,8 +1,6 @@
 package database
 
 import (
-	"fmt"
-
 	"github.com/xoreo/yearbook/models"
 )
 
@@ -74,10 +72,52 @@ func (db *Database) AddUser(user *models.User) error {
 
 // UpdateUser updates a user with the given new values in a user struct.
 func (db *Database) UpdateUser(user *models.User) error {
-	fmt.Printf("\n\n%v\n\n", user)
+	// HORRIBLE FUNC RIGHT HERE FIX THIS BOI
+	// fmt.Printf("\n\n%v\n\n", user)
 	db.mux.Lock()
 	defer db.mux.Unlock()
-	return db.DB.Update(user)
+
+	if user.Bio != "" {
+		err := db.DB.Update(&models.User{
+			Username: user.Username,
+			Bio:      user.Bio,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	if user.Will != "" {
+		err := db.DB.Update(&models.User{
+			Username: user.Username,
+			Will:     user.Will,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	if user.ProfilePic != nil {
+		err := db.DB.Update(&models.User{
+			Username:   user.Username,
+			ProfilePic: user.ProfilePic,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	if user.Nickname != "" {
+		err := db.DB.Update(&models.User{
+			Username: user.Username,
+			Nickname: user.Nickname,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // GetUser gets a user from the database.
