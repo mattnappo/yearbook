@@ -32,6 +32,15 @@ func (api *API) createPost(ctx *gin.Context) {
 
 	api.log.Debugf("constructed new post %s", post.String())
 
+	// Add the recipients to the database (if they do not already exist)
+	for _, recip := range post.Recipients {
+		newUser, err := models.NewUser(string(recip), models.Senior, false)
+		if api.check(err, ctx) {
+			return
+		}
+		err = api.database.AddUser(newUser)
+	}
+
 	// Add it to the database
 	err = api.database.AddPost(post)
 	if api.check(err, ctx) {
@@ -134,7 +143,7 @@ func (api *API) createUser(ctx *gin.Context) {
 	}
 
 	// Create the new user
-	user, err := models.NewUser(request.Email, grade)
+	user, err := models.NewUser(request.Email, grade, true)
 	if api.check(err, ctx) {
 		return
 	}

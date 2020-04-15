@@ -51,7 +51,7 @@ type User struct {
 	ProfilePic []byte `json:"profile_pic"`
 	Bio        string `json:"bio"`
 	Will       string `json:"will"`
-	Created    bool   `json:"created"` // Is the account actually owned?
+	Registered bool   `json:"registered"`
 }
 
 // Post represents a post in the database.
@@ -68,7 +68,7 @@ type Post struct {
 }
 
 // NewUser creates a *User given a valid email and grade.
-func NewUser(email string, grade Grade) (*User, error) {
+func NewUser(email string, grade Grade, registered bool) (*User, error) {
 	username, err := UsernameFromEmail(email)
 	if err != nil {
 		return nil, err
@@ -80,6 +80,7 @@ func NewUser(email string, grade Grade) (*User, error) {
 		Lastname:     username.lastname(),
 		Email:        username.email(),
 		Grade:        grade,
+		Registered:   registered,
 		RegisterDate: time.Now(),
 	}, nil
 }

@@ -3,7 +3,7 @@ package models
 import "testing"
 
 func TestNewUser(t *testing.T) {
-	user, err := NewUser("first.last@mastersny.org", Freshman)
+	user, err := NewUser("first.last@mastersny.org", Freshman, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,7 +27,7 @@ func TestNewPost(t *testing.T) {
 }
 
 func TestUserFromString(t *testing.T) {
-	user, err := NewUser("first.last@mastersny.org", Freshman)
+	user, err := NewUser("first.last@mastersny.org", Freshman, false)
 	if err != nil {
 		t.Fatal(err)
 	}
