@@ -199,7 +199,7 @@ func (api *API) authorize(ctx *gin.Context) {
 	// Decode the request
 	var request authorizeRequest
 	err := ctx.ShouldBindJSON(&request)
-	if api.check(err, ctx) {
+	if api.check(err, ctx, http.StatusBadRequest) {
 		return
 	}
 

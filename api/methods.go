@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/xoreo/yearbook/models"
+	"golang.org/x/oauth2"
 )
 
 // createPost creates a new post.
@@ -15,7 +16,7 @@ func (api *API) createPost(ctx *gin.Context) {
 	// Decode the post request
 	var request createPostRequest
 	err := ctx.ShouldBindJSON(&request)
-	if api.check(err, ctx) {
+	if api.check(err, ctx, http.StatusBadRequest) {
 		return
 	}
 
@@ -109,7 +110,7 @@ func (api *API) createUser(ctx *gin.Context) {
 	// Decode the new user request
 	var request createUserRequest
 	err := ctx.ShouldBindJSON(&request)
-	if api.check(err, ctx) {
+	if api.check(err, ctx, http.StatusBadRequest) {
 		return
 	}
 
@@ -157,12 +158,32 @@ func (api *API) updateUser(ctx *gin.Context) {
 	// Decode the request data
 	var request updateUserRequest
 	err := ctx.ShouldBindJSON(&request)
-	if api.check(err, ctx) {
+	if api.check(err, ctx, http.StatusBadRequest) {
 		return
 	}
 	api.log.Debugf("updating user with new info %v", request)
 
-	
+	// Construct a user struct with the new user data in it, and everything
+	// else blank.
+	newUserData, err := models.UserFromString(request.String())
+	if api.check(err, ctx) {
+		return
+	}
+
+	// Check that the username of the request is the same as the username
+	// of the account being modified.
+	bearerToken, err := extractBearerToken(ctx)
+	if api.check(err, ctx, http.StatusUnauthorized) {
+		return
+	}
+
+	// Query the Google API to get the email associated with the token
+	// in the request header.
+	headerToken := &oauth2.Token{AccessToken: bearerToken}
+	googleUser, err := api.getUserInfo(headerToken)
+	if api.check(err, ctx, http.StatusUnauthorized) {
+		return
+	}
 
 	// Marshal the request data into a new models.user
 }
