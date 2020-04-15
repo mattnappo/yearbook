@@ -77,44 +77,27 @@ func (db *Database) UpdateUser(user *models.User) error {
 	db.mux.Lock()
 	defer db.mux.Unlock()
 
+	lookupUser, err := db.GetUser(string(user.Username))
+	if err != nil {
+		return err
+	}
+
 	if user.Bio != "" {
-		err := db.DB.Update(&models.User{
-			Username: user.Username,
-			Bio:      user.Bio,
-		})
-		if err != nil {
-			return err
-		}
+		lookupUser.Bio = user.Bio
 	}
-
 	if user.Will != "" {
-		err := db.DB.Update(&models.User{
-			Username: user.Username,
-			Will:     user.Will,
-		})
-		if err != nil {
-			return err
-		}
+		lookupUser.Will = user.Will
 	}
-
 	if user.ProfilePic != nil {
-		err := db.DB.Update(&models.User{
-			Username:   user.Username,
-			ProfilePic: user.ProfilePic,
-		})
-		if err != nil {
-			return err
-		}
+		lookupUser.ProfilePic = user.ProfilePic
+	}
+	if user.Nickname != "" {
+		lookupUser.Nickname = user.Nickname
 	}
 
-	if user.Nickname != "" {
-		err := db.DB.Update(&models.User{
-			Username: user.Username,
-			Nickname: user.Nickname,
-		})
-		if err != nil {
-			return err
-		}
+	err = db.DB.Update(&lookupUser)
+	if err != nil {
+		return err
 	}
 
 	return nil

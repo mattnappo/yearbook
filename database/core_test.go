@@ -113,11 +113,12 @@ func TestUpdateUser(t *testing.T) {
 	// 	t.Fatal(err)
 	// }
 
-	newUserData := models.User{
+	newUserData := &models.User{
 		Username: "epic.man",
-		Bio:      "cool bio",
+		Nickname: "NICK",
 	}
-	err := db.UpdateUser(&newUserData)
+
+	err := db.UpdateUser(newUserData)
 	if err != nil {
 		t.Fatal(err)
 	}
