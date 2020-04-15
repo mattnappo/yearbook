@@ -171,11 +171,21 @@ func (api *API) updateUser(ctx *gin.Context) {
 
 	// Check that the username of the request is the same as the username
 	// of the account attempting to be modified via this request.
-	err = api.authenticate(ctx, newUserData.Username)
+	err = api.authenticate(ctx, string(newUserData.Username))
 	if api.check(err, ctx, http.StatusUnauthorized) {
 		return
 	}
-	// Marshal the request data into a new models.user
+
+	api.log.Infof("authenticated %s", string(newUserData.Username))
+
+	// Update the user in the database
+	err = api.database.UpdateUser(newUserData)
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Infof("updated user %s", string(newUserData.Username))
+	ctx.JSON(http.StatusOK, ok())
 }
 
 // getUser gets a user.

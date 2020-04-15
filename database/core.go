@@ -69,7 +69,11 @@ func (db *Database) AddUser(user *models.User) error {
 }
 
 // UpdateUser updates a user with the given new values in a user struct.
-func (db *Database) UpdateUser(newValue interface{}, user *models.User) error { return nil }
+func (db *Database) UpdateUser(user *models.User) error {
+	db.mux.Lock()
+	defer db.mux.Unlock()
+	return db.DB.Update(user)
+}
 
 // GetUser gets a user from the database.
 func (db *Database) GetUser(username string) (models.User, error) {

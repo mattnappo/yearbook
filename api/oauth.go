@@ -222,7 +222,7 @@ func (api *API) login(ctx *gin.Context) {
 
 // authorize is the Google authorization callback URL.
 func (api *API) authorize(ctx *gin.Context) {
-	api.log.Infof("request to authenticate")
+	api.log.Infof("request to authorize callback")
 
 	// Decode the request
 	var request authorizeRequest
@@ -257,7 +257,7 @@ func (api *API) authorize(ctx *gin.Context) {
 	if err == nil {
 		// Maybe search PG database to see if its valid
 		api.log.Infof("client has token")
-		ctx.JSON(http.StatusOK, gr(""))
+		ctx.JSON(http.StatusOK, ok())
 		return
 	}
 
@@ -297,6 +297,6 @@ func (api *API) authorize(ctx *gin.Context) {
 		Secure: false,
 	})
 
-	ctx.JSON(http.StatusOK, gr("")) // Do this
+	ctx.JSON(http.StatusOK, ok()) // Do this
 	// ctx.JSON(http.StatusOK, token.AccessToken) // Absolutely don't do this
 }
