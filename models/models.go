@@ -136,6 +136,18 @@ func NewPost(
 
 }
 
+// UserFromString returns a new User given a JSON/string representation
+// of a user struct.
+func UserFromString(data string) (*User, error) {
+	user := &User{}
+	err := json.Unmarshal([]byte(data), user)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, err
+}
+
 // UsernameFromEmail constructs a username given an email.
 func UsernameFromEmail(email string) (Username, error) {
 	// Check that the email is not too long

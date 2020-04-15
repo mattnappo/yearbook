@@ -25,3 +25,17 @@ func TestNewPost(t *testing.T) {
 
 	t.Log(post)
 }
+
+func TestUserFromString(t *testing.T) {
+	user, err := NewUser("first.last@mastersny.org", Freshman)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(user.String())
+
+	stringedUser, err := UserFromString(user.String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(stringedUser.String())
+}

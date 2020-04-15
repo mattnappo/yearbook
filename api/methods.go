@@ -12,7 +12,6 @@ import (
 // createPost creates a new post.
 func (api *API) createPost(ctx *gin.Context) {
 	api.log.Infof("request to create post")
-
 	// Decode the post request
 	var request createPostRequest
 	err := ctx.ShouldBindJSON(&request)
@@ -149,6 +148,23 @@ func (api *API) createUser(ctx *gin.Context) {
 
 	api.log.Infof("created new user %s", user.String())
 	ctx.JSON(http.StatusOK, ok())
+}
+
+// updateUser handles a request to update a user.
+func (api *API) updateUser(ctx *gin.Context) {
+	api.log.Infof("request to update user")
+
+	// Decode the request data
+	var request updateUserRequest
+	err := ctx.ShouldBindJSON(&request)
+	if api.check(err, ctx) {
+		return
+	}
+	api.log.Debugf("updating user with new info %v", request)
+
+	
+
+	// Marshal the request data into a new models.user
 }
 
 // getUser gets a user.

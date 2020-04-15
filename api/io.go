@@ -1,5 +1,7 @@
 package api
 
+import "encoding/json"
+
 // createUserRequest is the structure of a request to create a new user.
 type createUserRequest struct {
 	Email string `json:"email"`
@@ -16,6 +18,13 @@ type createPostRequest struct {
 type authorizeRequest struct {
 	Code  string `json:"code"`
 	State string `json:"state"`
+}
+
+type updateUserRequest struct {
+	Bio        string `json:"bio"`
+	Will       string `json:"will"`
+	ProfilePic string `json:"profile_pic"` // Base64 image string
+	Nickname   string `json:"nickname"`
 }
 
 // genericResponse represents a generic response.
@@ -38,4 +47,10 @@ func gr(data interface{}, errors ...string) genericResponse {
 // ok returns an OK generic response.
 func ok() genericResponse {
 	return genericResponse{"", nil}
+}
+
+// String marshals a updateUserRequest as a string.
+func (uur updateUserRequest) String() string {
+	json, _ := json.MarshalIndent(&uur, " ", "  ")
+	return string(json)
 }

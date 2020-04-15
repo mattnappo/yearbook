@@ -134,6 +134,7 @@ func (api *API) initializeRoutes() {
 		protectedRoutes.DELETE("deletePost/:id", api.deletePost)
 
 		protectedRoutes.POST("createUser", api.createUser)
+		protectedRoutes.PATCH("updateUser", api.updateUser)
 		protectedRoutes.GET("getUser/:username", api.getUser)
 		protectedRoutes.GET("getUsers", api.getUsers)
 		protectedRoutes.DELETE("deleteUser/:username", api.deleteUser)
