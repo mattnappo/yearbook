@@ -29,6 +29,9 @@ const (
 
 	// LogsDir is the location where all log files are stored.
 	LogsDir = "./data/logs"
+
+	// envFile is the path to the file containing needed environment variables.
+	envFile = "../.env"
 )
 
 // CreateDirIfDoesNotExist creates a directory if it does not already exist.
@@ -45,8 +48,8 @@ func CreateDirIfDoesNotExist(dir string) error {
 
 // GetEnv gets an environment variable
 func GetEnv(key string) string {
-	// Load .env file
-	err := godotenv.Load(".env")
+	// Load .env file every time
+	err := godotenv.Load(envFile)
 
 	if err != nil {
 		panic(errors.New("could not load .env file"))

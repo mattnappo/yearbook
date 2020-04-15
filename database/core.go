@@ -1,6 +1,10 @@
 package database
 
-import "github.com/xoreo/yearbook/models"
+import (
+	"fmt"
+
+	"github.com/xoreo/yearbook/models"
+)
 
 // AddPost adds a post to the database.
 func (db *Database) AddPost(post *models.Post) error {
@@ -70,6 +74,7 @@ func (db *Database) AddUser(user *models.User) error {
 
 // UpdateUser updates a user with the given new values in a user struct.
 func (db *Database) UpdateUser(user *models.User) error {
+	fmt.Printf("\n\n%v\n\n", user)
 	db.mux.Lock()
 	defer db.mux.Unlock()
 	return db.DB.Update(user)

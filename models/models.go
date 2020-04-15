@@ -38,19 +38,19 @@ const (
 // User represents a user.
 type User struct {
 	ID       int32    `pg:",pk" json:"id"`
-	Username Username `pg:",notnull,unique" json:"username"`
+	Username Username `pg:",pk" json:"username"`
 
-	Firstname  string `pg:",notnull" json:"firstname"`
-	Lastname   string `pg:",notnull" json:"lastname"`
-	Email      string `pg:",notnull,unique" json:"email"`
+	Firstname    string    `pg:",notnull" json:"firstname"`
+	Lastname     string    `pg:",notnull" json:"lastname"`
+	Email        string    `pg:",notnull,unique" json:"email"`
+	Grade        Grade     `pg:",use_zero" json:"grade"`
+	RegisterDate time.Time `pg:",notnull" json:"register_date"`
+
+	// Mutable fields
 	Nickname   string `json:"nickname"`
-	Grade      Grade  `pg:",use_zero" json:"grade"`
-	ProfilePic []byte `pg:",notnull" json:"profile_pic"`
-
-	Bio  string `json:"bio"`
-	Will string `json:"will"`
-
-	RegisterDate time.Time `pg:",notnull"`
+	ProfilePic []byte `json:"profile_pic"`
+	Bio        string `json:"bio"`
+	Will       string `json:"will"`
 }
 
 // Post represents a post in the database.

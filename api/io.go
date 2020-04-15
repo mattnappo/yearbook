@@ -21,7 +21,8 @@ type authorizeRequest struct {
 }
 
 type updateUserRequest struct {
-	Username   string `json:"username"` // For authentication purposes only
+	Username string `json:"username"` // For authentication purposes only
+	// Grade      string `json:"grade"`    // So that grade doesn't become null (freshman)
 	Bio        string `json:"bio"`
 	Will       string `json:"will"`
 	ProfilePic string `json:"profile_pic"` // Base64 image string
