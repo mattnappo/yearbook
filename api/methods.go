@@ -163,6 +163,8 @@ func (api *API) createUser(ctx *gin.Context) {
 func (api *API) updateUser(ctx *gin.Context) {
 	api.log.Infof("request to update user")
 
+	api.log.Infof("\n\n%v\n\n", ctx.Request.Body)
+
 	// Decode the request data
 	var request updateUserRequest
 	err := ctx.ShouldBindJSON(&request)
@@ -208,6 +210,31 @@ func (api *API) getUser(ctx *gin.Context) {
 	}
 
 	api.log.Infof("got user %s", user.String())
+	ctx.JSON(http.StatusOK, gr(user))
+}
+
+// getUserWithAuth handles a request to get a user
+// (with authentication).
+func (api *API) getUserWithAuth(ctx *gin.Context) {
+	api.log.Infof("request to get user with authentication")
+
+	// Check that the username of the request is the same as the username
+	// behind the token
+	username := ctx.Param("username")
+	err := api.authenticate(ctx, username)
+	if api.check(err, ctx, http.StatusUnauthorized) {
+		return
+	}
+
+	api.log.Infof("authenticated %s", username)
+
+	// Get the user from the database
+	user, err := api.database.GetUser(username)
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Infof("got user %s", username)
 	ctx.JSON(http.StatusOK, gr(user))
 }
 

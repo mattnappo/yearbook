@@ -78,7 +78,7 @@ func newAPI(port int64) (*API, error) {
 		port: port,
 
 		callbackURL: fmt.Sprintf(
-			"http://localhost:%d/app", 3000,
+			"http://localhost:%d/feed", 3000,
 		),
 		cookieStore: cookieStore,
 	}
@@ -111,6 +111,11 @@ func (api *API) check(err error, ctx *gin.Context, status ...int) bool {
 			break
 		}
 
+		// if statusCode == http.StatusUnauthorized {
+		// 	ctx.Redirect(http.StatusPermanentRedirect, "http://localhost:3000/")
+		// 	return true
+		// }
+
 		ctx.AbortWithStatusJSON( // Respond with the error}
 			statusCode, gr("", err.Error()),
 		)
@@ -136,6 +141,7 @@ func (api *API) initializeRoutes() {
 		protectedRoutes.POST("createUser", api.createUser)
 		protectedRoutes.PATCH("updateUser", api.updateUser)
 		protectedRoutes.GET("getUser/:username", api.getUser)
+		protectedRoutes.GET("getUserWithAuthentication/:username", api.getUserWithAuth)
 		protectedRoutes.GET("getUsers", api.getUsers)
 		protectedRoutes.DELETE("deleteUser/:username", api.deleteUser)
 	}

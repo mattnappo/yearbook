@@ -88,6 +88,9 @@ func (db *Database) UpdateUser(user *models.User) error {
 	if user.Will != "" {
 		lookupUser.Will = user.Will
 	}
+	if user.Grade != 0 {
+		lookupUser.Grade = user.Grade
+	}
 	if user.ProfilePic != nil {
 		lookupUser.ProfilePic = user.ProfilePic
 	}

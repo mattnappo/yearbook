@@ -252,7 +252,7 @@ func (api *API) authorize(ctx *gin.Context) {
 	}
 	api.log.Infof("session is valid")
 
-	// If they have a token, don't issue a new one
+	// If they have a token already, don't issue a new one
 	_, err = ctx.Request.Cookie("token")
 	if err == nil {
 		// Maybe search PG database to see if its valid
@@ -268,8 +268,7 @@ func (api *API) authorize(ctx *gin.Context) {
 		oauth2.NoContext,
 		request.Code,
 	)
-	if api.check(err, ctx) {
-		api.log.Criticalf("I AM THE BAD BOI")
+	if api.check(err, ctx, http.StatusUnauthorized) {
 		return
 	}
 	api.log.Debugf("transport initiated, fetched token %s", token.AccessToken)
@@ -286,6 +285,8 @@ func (api *API) authorize(ctx *gin.Context) {
 		return
 	}
 
+	api.log.Infof("inserted token entry into database for email %s", u.Email)
+
 	// Insert the sender user into the database (if it does not already exist)
 	newUser, err := models.NewUser(u.Email, models.Freshman, true)
 	if api.check(err, ctx) {
@@ -295,7 +296,7 @@ func (api *API) authorize(ctx *gin.Context) {
 	// decide whether or not to add the user.
 	api.database.AddUser(newUser)
 
-	api.log.Infof("inserted token entry into database for email %s", u.Email)
+	api.log.Infof("added user %s to database (in authorization)", u.Email)
 
 	// Set the token in a cookie
 	http.SetCookie(ctx.Writer, &http.Cookie{

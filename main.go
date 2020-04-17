@@ -10,7 +10,7 @@ import (
 
 var (
 	createSchemaFlag = flag.Bool("create-schema", false, "create the database schema")
-	apiPort          = flag.Int64("start-api", 8080, "start the API server on a given port")
+	apiPort          = flag.Int64("start-api", 8081, "start the API server on a given port")
 )
 
 func main() {

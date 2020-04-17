@@ -17,6 +17,7 @@
  * Traefik integration
  * DB & API methods to set bio, profile picture, senior will.
  * Search accounts
+ * Make profile picture a link to the google API link
 
 ## Bugs
  * Better error checking in Google API call function from google.
