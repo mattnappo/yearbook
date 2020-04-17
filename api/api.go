@@ -141,7 +141,11 @@ func (api *API) initializeRoutes() {
 		protectedRoutes.POST("createUser", api.createUser)
 		protectedRoutes.PATCH("updateUser", api.updateUser)
 		protectedRoutes.GET("getUser/:username", api.getUser)
+<<<<<<< HEAD
 		protectedRoutes.GET("getUserWithAuthentication/:username", api.getUserWithAuth)
+=======
+		protectedRoutes.GET("getUserWithAuthentication", api.getUserWithAuth)
+>>>>>>> 9336d3d4a5aba5feb80350532c24057c0a5ce1ca
 		protectedRoutes.GET("getUsers", api.getUsers)
 		protectedRoutes.DELETE("deleteUser/:username", api.deleteUser)
 	}
