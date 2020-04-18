@@ -91,9 +91,9 @@ func (db *Database) UpdateUser(user *models.User) error {
 	if user.Grade != 0 {
 		lookupUser.Grade = user.Grade
 	}
-	if user.ProfilePic != nil {
-		lookupUser.ProfilePic = user.ProfilePic
-	}
+	// if user.ProfilePic != nil {
+	// 	lookupUser.ProfilePic = user.ProfilePic
+	// }
 	if user.Nickname != "" {
 		lookupUser.Nickname = user.Nickname
 	}

@@ -292,8 +292,9 @@ func (api *API) authorize(ctx *gin.Context) {
 	if api.check(err, ctx) {
 		return
 	}
+	newUser.ProfilePic = u.Picture // Get and set the profile picture
 	// HANDLE THE ERROR ONE WAY OR ANOTHER. Maybe check if user exists and then
-	// decide whether or not to add the user.
+	// decide whether or not to add the user. AddUserIfNotExists maybe.
 	api.database.AddUser(newUser)
 
 	api.log.Infof("added user %s to database (in authorization)", u.Email)
@@ -302,6 +303,14 @@ func (api *API) authorize(ctx *gin.Context) {
 	http.SetCookie(ctx.Writer, &http.Cookie{
 		Name:   "token",
 		Value:  token.AccessToken,
+		Path:   "/",
+		MaxAge: 30 * 60,
+		Secure: false,
+	})
+	// Set the username in a cookie
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:   "username",
+		Value:  string(newUser.Username),
 		Path:   "/",
 		MaxAge: 30 * 60,
 		Secure: false,

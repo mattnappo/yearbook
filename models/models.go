@@ -48,7 +48,7 @@ type User struct {
 
 	// Mutable fields
 	Nickname   string `json:"nickname"`
-	ProfilePic []byte `json:"profile_pic"`
+	ProfilePic string `json:"profile_pic"` // A url
 	Bio        string `json:"bio"`
 	Will       string `json:"will"`
 	Registered bool   `json:"registered"`
