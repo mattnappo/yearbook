@@ -34,11 +34,11 @@ func (api *API) createPost(ctx *gin.Context) {
 
 	// Add the recipients to the database (if they do not already exist)
 	for _, recip := range post.Recipients {
-		newUser, err := models.NewUser(string(recip), models.Senior, false)
+		newUser, err := models.NewUser(recip.Email(), models.Senior, false)
 		if api.check(err, ctx) {
 			return
 		}
-		err = api.database.AddUser(newUser)
+		err = api.database.AddUser(newUser) // Unhandled err
 	}
 
 	// Add it to the database

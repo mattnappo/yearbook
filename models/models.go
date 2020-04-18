@@ -76,9 +76,9 @@ func NewUser(email string, grade Grade, registered bool) (*User, error) {
 
 	return &User{
 		Username:     username,
-		Firstname:    username.firstname(),
-		Lastname:     username.lastname(),
-		Email:        username.email(),
+		Firstname:    username.Firstname(),
+		Lastname:     username.Lastname(),
+		Email:        username.Email(),
 		Grade:        grade,
 		Registered:   registered,
 		RegisterDate: time.Now(),
@@ -169,20 +169,20 @@ func UsernameFromEmail(email string) (Username, error) {
 	return Username(email[0 : len(email)-len(common.EmailSuffix)]), nil
 }
 
-// return the first name associated with the username.
-func (u Username) firstname() string {
+// Firstname returns the first name associated with the username.
+func (u Username) Firstname() string {
 	components := strings.Split(string(u), ".")
 	return components[0]
 }
 
-// return the last name associated with the username.
-func (u Username) lastname() string {
+// Lastname returns the last name associated with the username.
+func (u Username) Lastname() string {
 	components := strings.Split(string(u), ".")
 	return strings.Split(components[1], "@")[0]
 }
 
-// return the email associated with the username.
-func (u Username) email() string {
+// Email returns the email associated with the username.
+func (u Username) Email() string {
 	return string(u) + common.EmailSuffix
 }
 
