@@ -218,7 +218,8 @@ func (api *API) getUser(ctx *gin.Context) {
 func (api *API) getUserWithAuth(ctx *gin.Context) {
 	api.log.Infof("request to get user with authentication")
 
-	// Check that the username of the request is the same as the username
+	// Check that the username of the request is the same as the
+	// username
 	// behind the token
 	username := ctx.Param("username")
 	err := api.authenticate(ctx, username)

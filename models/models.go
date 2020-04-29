@@ -52,6 +52,9 @@ type User struct {
 	Bio        string `json:"bio"`
 	Will       string `json:"will"`
 	Registered bool   `json:"registered"`
+
+	OutboundPosts []string `json:"posts_from"` // postIDs from this user
+	InboundPosts  []string `json:"posts_from"` // postIDs to this user
 }
 
 // Post represents a post in the database.
