@@ -106,6 +106,15 @@ func (db *Database) UpdateUser(user *models.User) error {
 	return nil
 }
 
+// AddToAndFrom populates the InboundPosts and OutboundPosts data
+// within a user
+func (db *Database) AddToAndFrom(
+	postID, sender string,
+	recipients []string,
+) error {
+	return nil
+}
+
 // GetUser gets a user from the database.
 func (db *Database) GetUser(username string) (models.User, error) {
 	user := &models.User{}

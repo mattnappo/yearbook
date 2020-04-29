@@ -32,6 +32,12 @@ func (api *API) createPost(ctx *gin.Context) {
 
 	api.log.Debugf("constructed new post %s", post.String())
 
+	// Add it to the database
+	err = api.database.AddPost(post)
+	if api.check(err, ctx) {
+		return
+	}
+
 	// Add the recipients to the database (if they do not already exist)
 	for _, recip := range post.Recipients {
 		newUser, err := models.NewUser(recip.Email(), models.Senior, false)
@@ -41,8 +47,8 @@ func (api *API) createPost(ctx *gin.Context) {
 		err = api.database.AddUser(newUser) // Unhandled err
 	}
 
-	// Add it to the database
-	err = api.database.AddPost(post)
+	// Add to and from post to user data
+	err = api.database.AddToAndFrom(post.ID, post.Sender, post.Recipients)
 	if api.check(err, ctx) {
 		return
 	}
