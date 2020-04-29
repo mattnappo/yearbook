@@ -109,9 +109,36 @@ func (db *Database) UpdateUser(user *models.User) error {
 // AddToAndFrom populates the InboundPosts and OutboundPosts data
 // within a user
 func (db *Database) AddToAndFrom(
-	postID, sender string,
-	recipients []string,
+	postID, senderUsername string,
+	recipientUsernames []string,
 ) error {
+	// Get the list of outbound posts from the user and append the new
+	// outbound postID
+	sender, err := db.GetUser(senderUsername)
+	if err != nil {
+		return err
+	}
+	outbound := sender.OutboundPosts
+	outbound = append(outbound, postID)
+	_, err = db.DB.Model(sender).
+		Set("outbound_posts = ?", outbound).
+		Where("id = ?", sender.ID).
+		Update()
+	if err != nil {
+		return err
+	}
+
+	/*
+		// Do the same thing as above, but for each recipient
+		for _, recipientUsername := range recipientUsernames {
+			recipient, err := db.GetUser(recipientUsername)
+			if err != nil {
+				return err
+			}
+			inbound := sender.InboundPosts
+			inbound = append(inbound, postID)
+		}
+	*/
 	return nil
 }
 

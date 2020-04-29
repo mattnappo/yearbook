@@ -1,4 +1,4 @@
-z# TODO
+# TODO
 
 ## Security
  * Secure the size of [][]byte images
@@ -23,3 +23,4 @@ z# TODO
  * Better error checking in Google API call function from google.
  * Add "registered" tag and create un-established users on post create with registered = false. Set registered = true when registering happens.
  * Make an AddUserIfNotExists databsae method
+ * Optimize the UpdateUser and AddToAndFrom database methods (one DB call)
