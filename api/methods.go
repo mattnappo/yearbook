@@ -19,6 +19,13 @@ func (api *API) createPost(ctx *gin.Context) {
 		return
 	}
 
+	// Check that the sender in the request is the same as the username
+	// associated with that username's token
+	err = api.authenticate(ctx, request.Sender)
+	if api.check(err, ctx, http.StatusUnauthorized) {
+		return
+	}
+
 	// Create the new post
 	post, err := models.NewPost(
 		request.Sender,
