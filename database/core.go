@@ -120,7 +120,7 @@ func (db *Database) AddToAndFrom(
 	}
 	outbound := sender.OutboundPosts
 	outbound = append(outbound, postID)
-	_, err = db.DB.Model(sender).
+	_, err = db.DB.Model(&sender).
 		Set("outbound_posts = ?", outbound).
 		Where("id = ?", sender.ID).
 		Update()

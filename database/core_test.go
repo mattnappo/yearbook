@@ -117,6 +117,21 @@ func TestUpdateUser(t *testing.T) {
 	}
 }
 
+func TestAddToAndFrom(t *testint.T) {
+	db := Connect(false)
+	defer db.Disconnect()
+
+	err := db.AddToAndFrom(
+		"f617837bfae246872e169b65007cbfa9e11549f26dbfa337033c032e7bfe9e04",
+		"matthew.nappo",
+		[]string{"coolrecip.one"},
+	)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestGetUser(t *testing.T) {
 	db := Connect(false)
 	defer db.Disconnect()

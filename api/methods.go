@@ -48,7 +48,11 @@ func (api *API) createPost(ctx *gin.Context) {
 	}
 
 	// Add to and from post to user data
-	err = api.database.AddToAndFrom(post.ID, post.Sender, post.Recipients)
+	err = api.database.AddToAndFrom(
+		post.PostID,
+		string(post.Sender),
+		request.Recipients,
+	)
 	if api.check(err, ctx) {
 		return
 	}
