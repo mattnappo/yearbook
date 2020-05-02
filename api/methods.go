@@ -267,7 +267,19 @@ func (api *API) getUsers(ctx *gin.Context) {
 
 	api.log.Infof("got all users")
 	ctx.JSON(http.StatusOK, gr(users))
+}
 
+// getUsernames gets all usernames.
+func (api *API) getUsernames(ctx *gin.Context) {
+	api.log.Infof("request to get all usernames")
+
+	usernames, err := api.database.GetAllUsernames()
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Infof("got all usernames")
+	ctx.JSON(http.StatusOK, gr(usernames))
 }
 
 // deleteUser deletes a user.
