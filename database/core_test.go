@@ -117,7 +117,7 @@ func TestUpdateUser(t *testing.T) {
 	}
 }
 
-func TestAddToAndFrom(t *testint.T) {
+func TestAddToAndFrom(t *testing.T) {
 	db := Connect(false)
 	defer db.Disconnect()
 
@@ -154,6 +154,18 @@ func TestGetAllUsers(t *testing.T) {
 	}
 
 	t.Log(users)
+}
+
+func TestGetAllUsernames(t *testing.T) {
+	db := Connect(false)
+	defer db.Disconnect()
+
+	usernames, err := db.GetAllUsernames()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(usernames)
 }
 
 func TestDeleteUser(t *testing.T) {

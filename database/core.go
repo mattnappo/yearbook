@@ -174,6 +174,24 @@ func (db *Database) GetAllUsers() ([]models.User, error) {
 	return users, nil
 }
 
+func (db *Database) GetAllUsernames() ([]string, error) {
+	var usernames []string
+	err := db.DB.Model((*models.User)(nil)).
+		Column("username").
+		Select(&usernames)
+
+	/*
+		var user *models.User
+		usernames, err := db.DB.Model(user).
+			Column("username").
+			Select()
+	*/
+	if err != nil {
+		return nil, err
+	}
+	return usernames, nil
+}
+
 // DeleteUser deletes a user from the database
 func (db *Database) DeleteUser(username string) error {
 	db.mux.Lock()
