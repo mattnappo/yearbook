@@ -1,6 +1,7 @@
 package database
 
 import (
+	"github.com/go-pg/pg"
 	"github.com/xoreo/yearbook/models"
 )
 
@@ -113,7 +114,7 @@ func (db *Database) AddToAndFrom(
 	recipientUsernames []string,
 ) error {
 	// Get the list of outbound posts from the user and append the new
-	// outbound postID
+	// outbound postID to the array in the sender db entry
 	sender, err := db.GetUser(senderUsername)
 	if err != nil {
 		return err
@@ -124,8 +125,15 @@ func (db *Database) AddToAndFrom(
 		Set("outbound_posts = ?", outbound).
 		Where("id = ?", sender.ID).
 		Update()
+
+	// Return the error as long as it is not a duplicate key violation.
 	if err != nil {
-		return err
+		pgErr, ok := err.(pg.Error)
+		if ok && pgErr.IntegrityViolation() {
+			return nil
+		} else {
+			return err
+		}
 	}
 
 	/*
