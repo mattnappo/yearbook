@@ -156,11 +156,11 @@ func TestGetAllUsers(t *testing.T) {
 	t.Log(users)
 }
 
-func TestGetAllUsernames(t *testing.T) {
+func TestGetAllSeniorUsernames(t *testing.T) {
 	db := Connect(false)
 	defer db.Disconnect()
 
-	usernames, err := db.GetAllUsernames()
+	usernames, err := db.GetAllSeniorUsernames()
 	if err != nil {
 		t.Fatal(err)
 	}
