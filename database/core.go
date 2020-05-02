@@ -121,32 +121,33 @@ func (db *Database) AddToAndFrom(
 	}
 	outbound := sender.OutboundPosts
 	outbound = append(outbound, postID)
+	// Update the array in the database
 	_, err = db.DB.Model(&sender).
 		Set("outbound_posts = ?", outbound).
 		Where("id = ?", sender.ID).
 		Update()
-
-	// Return the error as long as it is not a duplicate key violation.
-	if err != nil {
-		pgErr, ok := err.(pg.Error)
-		if ok && pgErr.IntegrityViolation() {
-			return nil
-		} else {
-			return err
-		}
+	if checkIntegrity(err) != nil {
+		return err
 	}
 
-	/*
-		// Do the same thing as above, but for each recipient
-		for _, recipientUsername := range recipientUsernames {
-			recipient, err := db.GetUser(recipientUsername)
-			if err != nil {
-				return err
-			}
-			inbound := sender.InboundPosts
-			inbound = append(inbound, postID)
+	// Do the same thing as above, but for each recipient
+	for _, recipientUsername := range recipientUsernames {
+		recipient, err := db.GetUser(recipientUsername)
+		if err != nil {
+			return err
 		}
-	*/
+		inbound := sender.InboundPosts
+		inbound = append(inbound, postID)
+		// Update the array in the database
+		_, err = db.DB.Model(&recipient).
+			Set("inbound_posts = ?", inbound).
+			Where("id = ?", recipient.ID).
+			Update()
+		if checkIntegrity(err) != nil {
+			return err
+		}
+
+	}
 	return nil
 }
 
@@ -181,4 +182,17 @@ func (db *Database) DeleteUser(username string) error {
 		Where("username = ?", username).
 		Delete()
 	return err
+}
+
+// checkIntegrity checks the integrity of a postgres model function return.
+func checkIntegrity(err error) error {
+	// Return the error as long as it is not a duplicate key violation.
+	if err != nil {
+		pgErr, ok := err.(pg.Error)
+		if ok && pgErr.IntegrityViolation() {
+			return nil
+		}
+		return err
+	}
+	return nil
 }
