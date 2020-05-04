@@ -4,6 +4,8 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/joho/godotenv"
 )
@@ -56,4 +58,17 @@ func GetEnv(key string) string {
 	}
 
 	return os.Getenv(key)
+}
+
+// StringToArray returns an array given a string.
+func StringToArray(s string) []string {
+	s = strings.TrimSuffix(s, "]")
+	s = trimFirstRune(s)
+	s = strings.ReplaceAll(s, "\"", "")
+	return strings.Split(s, ", ")
+}
+
+func trimFirstRune(s string) string {
+	_, i := utf8.DecodeRuneInString(s)
+	return s[i:]
 }

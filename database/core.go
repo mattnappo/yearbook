@@ -170,15 +170,24 @@ func (db *Database) GetUserInbound(username string) ([]models.Post, error) {
 	var inboundPostIDs []string
 
 	// Get the list of inbound postIDs
+	/*
+		err := db.DB.Model((*models.User)(nil)).
+			Column("inbound_posts").
+			Where("username = ?", username).
+			Select(&inboundPostIDs)
+	*/
+	var inboundPost *interface{}
 	err := db.DB.Model((*models.User)(nil)).
 		Column("inbound_posts").
 		Where("username = ?", username).
 		Select(&inboundPostIDs)
+	fmt.Printf("THING: \n%v\n", inboundPost)
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("\n\n %s\n\n", inboundPostIDs[0])
 	var posts []models.Post
-	post, err := db.GetPost(inboundPostIDs[0])
+	post, err := db.GetPost("a6b9d19f01c0205d5da39b734902273384a5b493d422b6240f953ba521438c85")
 	if err != nil {
 		return nil, err
 	}
