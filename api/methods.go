@@ -311,9 +311,11 @@ func (api *API) getActivity(ctx *gin.Context) {
 
 	api.log.Infof("authenticated %s", username)
 
-	userData, err := api.database.GetUserInbound(username)
+	inboundPosts, err := api.database.GetUserInbound(username)
 	if api.check(err, ctx) {
 		return
 	}
 
+	api.log.Infof("got %s's inbound posts", username)
+	ctx.JSON(http.StatusOK, gr(inboundPosts))
 }
