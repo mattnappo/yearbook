@@ -53,8 +53,8 @@ type User struct {
 	Will       string `json:"will"`
 	Registered bool   `json:"registered"`
 
-	OutboundPosts []string `json:"outbound_posts"`           // postIDs from this user
-	InboundPosts  []string `pg",array" json:"inbound_posts"` // postIDs to this user
+	OutboundPosts []string `json:"outbound_posts"` // postIDs from this user
+	InboundPosts  []string `json:"inbound_posts"`  // postIDs to this user
 }
 
 // Post represents a post in the database.

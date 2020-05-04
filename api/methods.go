@@ -271,6 +271,19 @@ func (api *API) getUsers(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gr(users))
 }
 
+// getUsernames gets all usernames in the database.
+func (api *API) getUsernames(ctx *gin.Context) {
+	api.log.Infof("request to get all usernames")
+
+	usernames, err := api.database.GetAllUsernames()
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Infof("got all usernames")
+	ctx.JSON(http.StatusOK, gr(usernames))
+}
+
 // getSeniors gets all senior usernames.
 func (api *API) getSeniors(ctx *gin.Context) {
 	api.log.Infof("request to get all senior usernames")

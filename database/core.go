@@ -200,6 +200,15 @@ func (db *Database) GetAllUsers() ([]models.User, error) {
 	return users, err
 }
 
+// GetAllUsernames gets all usernames in the database.
+func (db *Database) GetAllUsernames() ([]string, error) {
+	var usernames []string
+	err := db.DB.Model((*models.User)(nil)).
+		Column("username").
+		Select(&usernames)
+	return usernames, err
+}
+
 // GetAllSeniorUsernames gets all of the usernames of all of the seniors.
 func (db *Database) GetAllSeniorUsernames() ([]string, error) {
 	var usernames []string

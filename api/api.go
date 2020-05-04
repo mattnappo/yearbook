@@ -145,6 +145,7 @@ func (api *API) initializeRoutes() {
 		protectedRoutes.GET("getUserWithAuthentication/:username", api.getUserWithAuth)
 		protectedRoutes.GET("getUsers", api.getUsers)
 		protectedRoutes.GET("getSeniors", api.getSeniors)
+		protectedRoutes.GET("getUsernames", api.getUsernames)
 		protectedRoutes.DELETE("deleteUser/:username", api.deleteUser)
 	}
 
