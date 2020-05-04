@@ -40,7 +40,7 @@ func TestAddPost(t *testing.T) {
 }
 
 func TestGetPost(t *testing.T) {
-	pid := "c596d281587fa801d1329558f39f9792a9a96ca9bf75f18296a8172b46393403"
+	pid := "a6b9d19f01c0205d5da39b734902273384a5b493d422b6240f953ba521438c85"
 	db := Connect(false)
 	defer db.Disconnect()
 

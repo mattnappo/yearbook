@@ -141,6 +141,7 @@ func (api *API) initializeRoutes() {
 		protectedRoutes.POST("createUser", api.createUser)
 		protectedRoutes.PATCH("updateUser", api.updateUser)
 		protectedRoutes.GET("getUser/:username", api.getUser)
+		protectedRoutes.GET("getActivity/:username", api.getActivity)
 		protectedRoutes.GET("getUserWithAuthentication/:username", api.getUserWithAuth)
 		protectedRoutes.GET("getUsers", api.getUsers)
 		protectedRoutes.GET("getSeniors", api.getSeniors)

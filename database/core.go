@@ -1,6 +1,8 @@
 package database
 
 import (
+	"fmt"
+
 	"github.com/go-pg/pg"
 	"github.com/xoreo/yearbook/models"
 )
@@ -175,16 +177,24 @@ func (db *Database) GetUserInbound(username string) ([]models.Post, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	// Lookup each post in that database
 	var posts []models.Post
-	for _, inboundPostID := range inboundPostIDs {
-		post, err := db.GetPost(inboundPostID)
-		if err != nil {
-			return nil, err
-		}
-		posts = append(posts, post)
+	post, err := db.GetPost(inboundPostIDs[0])
+	if err != nil {
+		return nil, err
 	}
+	posts = append(posts, post)
+	/*
+		// Lookup each post in that database
+		var posts []models.Post
+		for _, inboundPostID := range inboundPostIDs {
+			fmt.Printf("\n\n%s\n\n", inboundPostID)
+			post, err := db.GetPost(inboundPostID)
+			if err != nil {
+				return nil, err
+			}
+			posts = append(posts, post)
+		}
+	*/
 	return posts, nil
 }
 
@@ -228,3 +238,18 @@ func checkIntegrity(err error) error {
 	}
 	return nil
 }
+
+/*
+// checkNoResults checks if the error is a postgres null result error.
+func checkNoResults(err error) error {
+	// Return the error as long as it is not a no results in set error.
+	if err != nil {
+		pgErr, ok := err.(pg.Error)
+		if ok && pgErr.Field() == pg.ErrNoRows.Error() {
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+*/
