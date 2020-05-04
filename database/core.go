@@ -103,7 +103,6 @@ func (db *Database) UpdateUser(user *models.User) error {
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -164,14 +163,36 @@ func (db *Database) GetUser(username string) (models.User, error) {
 	return *user, nil
 }
 
+// GetUserInbound returns the inbound posts to a user.
+func (db *Database) GetUserInbound(username string) ([]models.Post, error) {
+	var inboundPostIDs []string
+
+	// Get the list of inbound postIDs
+	err := db.DB.Model((*models.User)(nil)).
+		Column("inbound_posts").
+		Where("username = ?", username).
+		Select(&inboundPostIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	// Lookup each post in that database
+	var posts []models.Post
+	for _, inboundPostID := range inboundPostIDs {
+		post, err := db.GetPost(inboundPostID)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, post)
+	}
+	return posts, nil
+}
+
 // GetAllUsers gets all users from the database.
 func (db *Database) GetAllUsers() ([]models.User, error) {
 	var users []models.User
 	err := db.DB.Model(&users).Select()
-	if err != nil {
-		return nil, err
-	}
-	return users, nil
+	return users, err
 }
 
 // GetAllSeniorUsernames gets all of the usernames of all of the seniors.
@@ -182,10 +203,7 @@ func (db *Database) GetAllSeniorUsernames() ([]string, error) {
 		Where("grade = 3").
 		Select(&usernames)
 
-	if err != nil {
-		return nil, err
-	}
-	return usernames, nil
+	return usernames, err
 }
 
 // DeleteUser deletes a user from the database
