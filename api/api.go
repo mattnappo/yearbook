@@ -78,7 +78,7 @@ func newAPI(port int64) (*API, error) {
 		port: port,
 
 		callbackURL: fmt.Sprintf(
-			"http://localhost:%d/feed", 3000,
+			"http://localhost:%d/oauth", 3000,
 		),
 		cookieStore: cookieStore,
 	}
