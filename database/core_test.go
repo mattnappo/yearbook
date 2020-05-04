@@ -59,7 +59,10 @@ func TestGetAllPosts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(posts)
+	for _, post := range posts {
+		t.Logf("ID: %d, LEN: %d\n", post.ID, len(post.Images))
+	}
+	// t.Log(posts)
 }
 
 func TestGetnPosts(t *testing.T) {

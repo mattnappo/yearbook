@@ -19,6 +19,8 @@ func (api *API) createPost(ctx *gin.Context) {
 		return
 	}
 
+	api.log.Infof("\n\nrequest to create post: %v", request)
+
 	// Check that the sender in the request is the same as the username
 	// associated with that username's token
 	err = api.authenticate(ctx, request.Sender)
@@ -294,4 +296,24 @@ func (api *API) deleteUser(ctx *gin.Context) {
 
 	api.log.Infof("deleted user %s", username)
 	ctx.JSON(http.StatusOK, ok())
+}
+
+// getActivity gets a list of the recent posts about a user.
+func (api *API) getActivity(ctx *gin.Context) {
+	username := ctx.Param("username")
+	api.log.Infof("request to get activity for %s", username)
+
+	// Authenticate the user
+	err := api.authenticate(ctx, username)
+	if api.check(err, ctx, http.StatusUnauthorized) {
+		return
+	}
+
+	api.log.Infof("authenticated %s", username)
+
+	userData, err := api.database.GetUserInbound(username)
+	if api.check(err, ctx) {
+		return
+	}
+
 }
