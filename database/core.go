@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/go-pg/pg"
+	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/models"
 )
 
@@ -167,43 +168,28 @@ func (db *Database) GetUser(username string) (models.User, error) {
 
 // GetUserInbound returns the inbound posts to a user.
 func (db *Database) GetUserInbound(username string) ([]models.Post, error) {
-	var inboundPostIDs []string
+	var inboundPostIDsRaw string
 
 	// Get the list of inbound postIDs
-	/*
-		err := db.DB.Model((*models.User)(nil)).
-			Column("inbound_posts").
-			Where("username = ?", username).
-			Select(&inboundPostIDs)
-	*/
-	var inboundPost *interface{}
 	err := db.DB.Model((*models.User)(nil)).
 		Column("inbound_posts").
 		Where("username = ?", username).
-		Select(&inboundPostIDs)
-	fmt.Printf("THING: \n%v\n", inboundPost)
+		Select(&inboundPostIDsRaw)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("\n\n %s\n\n", inboundPostIDs[0])
+	inboundPostIDs := common.StringToArray(inboundPostIDsRaw)
+
+	// Get all of the posts given the postIDs
 	var posts []models.Post
-	post, err := db.GetPost("a6b9d19f01c0205d5da39b734902273384a5b493d422b6240f953ba521438c85")
-	if err != nil {
-		return nil, err
-	}
-	posts = append(posts, post)
-	/*
-		// Lookup each post in that database
-		var posts []models.Post
-		for _, inboundPostID := range inboundPostIDs {
-			fmt.Printf("\n\n%s\n\n", inboundPostID)
-			post, err := db.GetPost(inboundPostID)
-			if err != nil {
-				return nil, err
-			}
-			posts = append(posts, post)
+	for _, inboundPostID := range inboundPostIDs {
+		fmt.Printf("\n\n%s\n\n", inboundPostID)
+		post, err := db.GetPost(inboundPostID)
+		if err != nil {
+			return nil, err
 		}
-	*/
+		posts = append(posts, post)
+	}
 	return posts, nil
 }
 
