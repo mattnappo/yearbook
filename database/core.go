@@ -1,8 +1,6 @@
 package database
 
 import (
-	"fmt"
-
 	"github.com/go-pg/pg"
 	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/models"
@@ -183,11 +181,7 @@ func (db *Database) GetUserInbound(username string) ([]models.Post, error) {
 	// Get all of the posts given the postIDs
 	var posts []models.Post
 	for _, inboundPostID := range inboundPostIDs {
-		fmt.Printf("\n\n%s\n\n", inboundPostID)
-		post, err := db.GetPost(inboundPostID)
-		if err != nil {
-			return nil, err
-		}
+		post, _ := db.GetPost(inboundPostID) // CHECK THIS ERROR SOMEHOW
 		posts = append(posts, post)
 	}
 	return posts, nil

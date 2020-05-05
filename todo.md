@@ -1,26 +1,25 @@
 # TODO
 
 ## Security
- * Secure the size of [][]byte images
- * Encrypt the environment variables 
- * Better SQL-injection protection (? instances)
- * Docker / k8
- * Allow only masters emails
- * HTTPS w/ Let's Encrypt OR Cloudflare
- * Scale backend sessions (PG? Redis?)
- * Implement refresh tokens
- * Have the backend handle routing
- * Should getUserInfo also check the token DB?
+ * Secure the size of images (set a cap. compression?)
+ * Better SQL-injection protection
+ * Have the backend handle routing?
+ * What's going on with sessions?
+
+## Scalability
+ * Scale the backend sessions (PG? Redis?)
+ * Optimize the UpdateUser and AddToAndFrom database methods (one DB call)
 
 ## Features
- * DB & API methods to get all posts from a person, a posts to a person
+ * Profile pic should be either base64 OR a Google link
+ * Add all seniors to the DB
+
+## Network
+ * Docker / k8
+ * HTTPS w/ Let's Encrypt OR Cloudflare
  * Traefik integration
- * DB & API methods to set bio, profile picture, senior will.
- * Search accounts
- * Make profile picture a link to the google API link
+ * Caching layer
 
 ## Bugs
- * Better error checking in Google API call function from google.
- * Add "registered" tag and create un-established users on post create with registered = false. Set registered = true when registering happens.
- * Make an AddUserIfNotExists databsae method
- * Optimize the UpdateUser and AddToAndFrom database methods (one DB call)
+ * Better error handling (stop ignoring some errors)
+ * Write more unit tests
