@@ -1,6 +1,9 @@
 package api
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"github.com/xoreo/yearbook/models"
+)
 
 // createUserRequest is the structure of a request to create a new user.
 type createUserRequest struct {
@@ -39,6 +42,12 @@ type genericResponse struct {
 type loginResponse struct {
 	Link  string `json:"link"`
 	State string `json:"state"`
+}
+
+// inboundOutboundResponse is the response of a getUserPosts/:username request
+type inboundOutboundResponse struct {
+	Inbound  []models.Post `json:"inbound"`
+	Outbound []models.Post `json:"outbound"`
 }
 
 // gr constructs a new genericResponse.

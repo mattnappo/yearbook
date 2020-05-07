@@ -2,7 +2,6 @@ package database
 
 import (
 	"github.com/go-pg/pg"
-	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/models"
 )
 
@@ -164,27 +163,47 @@ func (db *Database) GetUser(username string) (models.User, error) {
 	return *user, nil
 }
 
-// GetUserInbound returns the inbound posts to a user.
+// GetUserInbound returns the inbound posts of a user.
 func (db *Database) GetUserInbound(username string) ([]models.Post, error) {
-	var inboundPostIDsRaw string
+	var inboundPostIDs models.User
 
 	// Get the list of inbound postIDs
 	err := db.DB.Model((*models.User)(nil)).
 		Column("inbound_posts").
 		Where("username = ?", username).
-		Select(&inboundPostIDsRaw)
+		Select(&inboundPostIDs)
 	if err != nil {
 		return nil, err
 	}
-	inboundPostIDs := common.StringToArray(inboundPostIDsRaw)
 
 	// Get all of the posts given the postIDs
 	var posts []models.Post
-	for _, inboundPostID := range inboundPostIDs {
+	for _, inboundPostID := range inboundPostIDs.InboundPosts {
 		post, _ := db.GetPost(inboundPostID) // CHECK THIS ERROR SOMEHOW
 		posts = append(posts, post)
 	}
 	return posts, nil
+}
+
+// GetUserInboundOutbound returns partial information about the inbound
+// and outbound posts of a user.
+func (db *Database) GetUserInboundOutbound(username string) ([][]models.Post, error) {
+	var postIDs models.User
+
+	// Get the list of inbound and outbound postIDs
+	err := db.DB.Model((*models.User)(nil)).
+		Column("inbound_posts", "outbound_posts").
+		Where("username = ?", username).
+		Select(&postIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get all of the necessary post data given the post IDs
+	// Really these should throw errors
+	inboundPosts := db.traversePosts(postIDs.InboundPosts)
+	outboundPosts := db.traversePosts(postIDs.OutboundPosts)
+	return [][]models.Post{inboundPosts, outboundPosts}, nil
 }
 
 // GetAllUsers gets all users from the database.
@@ -251,3 +270,17 @@ func checkNoResults(err error) error {
 	return nil
 }
 */
+
+// traversePosts returns some data about posts given a []string of postIDs.
+func (db *Database) traversePosts(postIDs []string) []models.Post {
+	var posts []models.Post
+	for _, postID := range postIDs {
+		var post models.Post
+		db.DB.Model((*models.Post)(nil)).
+			Column("id", "sender", "recipients").
+			Where("post_id = ?", postID).
+			Select(&post)
+		posts = append(posts, post)
+	}
+	return posts
+}

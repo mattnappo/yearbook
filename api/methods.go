@@ -344,5 +344,9 @@ func (api *API) getUserPosts(ctx *gin.Context) {
 	}
 
 	api.log.Infof("got %s's inbound and outbound posts", username)
-	ctx.JSON(http.StatusOK, gr(posts))
+	res := inboundOutboundResponse{
+		Inbound:  posts[0],
+		Outbound: posts[1],
+	}
+	ctx.JSON(http.StatusOK, gr(res))
 }

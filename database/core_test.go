@@ -181,3 +181,13 @@ func TestDeleteUser(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestGetUserInboundOutbound(t *testing.T) {
+	db := Connect(false)
+	defer db.Disconnect()
+
+	_, err := db.GetUserInboundOutbound("matthew.nappo")
+	if err != nil {
+		t.Fatal(err)
+	}
+}
