@@ -5,6 +5,7 @@
  * Better SQL-injection protection
  * Have the backend handle routing?
  * What's going on with sessions?
+ * Httponly cookies
 
 ## Scalability
  * Scale the backend sessions (PG? Redis?)
@@ -13,6 +14,7 @@
 ## Features
  * Profile pic should be either base64 OR a Google link
  * Add all seniors to the DB
+ * Refresh tokens
 
 ## Network
  * Docker / k8

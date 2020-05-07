@@ -332,3 +332,17 @@ func (api *API) getActivity(ctx *gin.Context) {
 	api.log.Infof("got %s's inbound posts", username)
 	ctx.JSON(http.StatusOK, gr(inboundPosts))
 }
+
+// getUserPosts gets the inbound and outbound posts of a user.
+func (api *API) getUserPosts(ctx *gin.Context) {
+	username := ctx.Param("username")
+	api.log.Infof("request to get user posts for user %s", username)
+
+	posts, err := api.database.GetUserInboundOutbound(username)
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Infof("got %s's inbound and outbound posts", username)
+	ctx.JSON(http.StatusOK, gr(posts))
+}
