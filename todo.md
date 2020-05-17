@@ -6,6 +6,8 @@
  * Have the backend handle routing?
  * What's going on with sessions?
  * Httponly cookies
+ * Authentication for more methods, remove unused methods
+ * Don't expose every route (like create account)
 
 ## Scalability
  * Scale the backend sessions (PG? Redis?)

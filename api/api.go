@@ -30,6 +30,11 @@ const (
 
 	// defaultSessionTimeout represenst the expiration time of a session cookie.
 	defaultSessionTimeout = time.Minute * 30
+
+	// The frontend callback data
+	// callbackURL  = "https://mastersseniors.ddns.net:%d/oauth"
+	callbackURL  = "http://localhost:%d/oauth"
+	callbackPort = 3000
 )
 
 // API contains the API layer.
@@ -66,6 +71,7 @@ func newAPI(port int64) (*API, error) {
 	r := gin.New()
 	r.Use(sessions.Sessions("go_session", cookieStore))
 	r.Use(gin.Recovery())
+	r.Use(gin.Logger())
 
 	// Construct the API
 	api := &API{
@@ -78,7 +84,7 @@ func newAPI(port int64) (*API, error) {
 		port: port,
 
 		callbackURL: fmt.Sprintf(
-			"http://localhost:%d/oauth", 3000,
+			callbackURL, callbackPort,
 		),
 		cookieStore: cookieStore,
 	}
@@ -141,6 +147,7 @@ func (api *API) initializeRoutes() {
 		protectedRoutes.POST("createUser", api.createUser)
 		protectedRoutes.PATCH("updateUser", api.updateUser)
 		protectedRoutes.GET("getUser/:username", api.getUser)
+		protectedRoutes.GET("getUserProfilePic/:username", api.getUserProfilePic)
 		protectedRoutes.GET("getActivity/:username", api.getActivity)
 		protectedRoutes.GET("getUserPosts/:username", api.getUserPosts)
 		protectedRoutes.GET("getUserWithAuthentication/:username", api.getUserWithAuth)
@@ -201,7 +208,7 @@ func (api *API) initLogger() error {
 		return err
 	}
 
-	logger.SetLogLevel(loggo.DEBUG)
+	logger.SetLogLevel(loggo.CRITICAL)
 
 	// Create the log file
 	logFile, err := os.OpenFile(filepath.FromSlash(fmt.Sprintf(

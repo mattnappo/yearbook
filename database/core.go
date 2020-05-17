@@ -206,6 +206,17 @@ func (db *Database) GetUserInboundOutbound(username string) ([][]models.Post, er
 	return [][]models.Post{inboundPosts, outboundPosts}, nil
 }
 
+// GetUserProfilePic gets a user's profile pic given username.
+func (db *Database) GetUserProfilePic(username string) (string, error) {
+	var profilePic string
+	err := db.DB.Model((*models.User)(nil)).
+		Column("profile_pic").
+		Where("username = ?", username).
+		Select(&profilePic)
+
+	return profilePic, err
+}
+
 // GetAllUsers gets all users from the database.
 func (db *Database) GetAllUsers() ([]models.User, error) {
 	var users []models.User
@@ -277,7 +288,6 @@ func (db *Database) traversePosts(postIDs []string) []models.Post {
 	for _, postID := range postIDs {
 		var post models.Post
 		db.DB.Model((*models.Post)(nil)).
-			Column("id", "sender", "recipients").
 			Where("post_id = ?", postID).
 			Select(&post)
 		posts = append(posts, post)

@@ -232,6 +232,20 @@ func (api *API) getUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gr(user))
 }
 
+// getUserProfilePic gets the profile picture of a user.
+func (api *API) getUserProfilePic(ctx *gin.Context) {
+	username := ctx.Param("username")
+	api.log.Infof("request to get user profile pic %s", username)
+
+	profilePic, err := api.database.GetUserProfilePic(username)
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Infof("got user profile pic for %s", username)
+	ctx.JSON(http.StatusOK, gr(profilePic))
+}
+
 // getUserWithAuth handles a request to get a user
 // (with authentication).
 func (api *API) getUserWithAuth(ctx *gin.Context) {
