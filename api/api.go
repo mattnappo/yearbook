@@ -33,8 +33,9 @@ const (
 
 	// The frontend callback data
 	// callbackURL  = "https://mastersseniors.ddns.net:%d/oauth"
-	callbackURL  = "http://localhost:%d/oauth"
-	callbackPort = 3000
+	callbackProvider = "localhost"
+	callbackURL      = "http://%s:%d/oauth"
+	callbackPort     = 3000
 )
 
 // API contains the API layer.
@@ -84,7 +85,7 @@ func newAPI(port int64) (*API, error) {
 		port: port,
 
 		callbackURL: fmt.Sprintf(
-			callbackURL, callbackPort,
+			callbackURL, callbackProvider, callbackPort,
 		),
 		cookieStore: cookieStore,
 	}
