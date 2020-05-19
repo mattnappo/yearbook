@@ -217,6 +217,17 @@ func (db *Database) GetUserProfilePic(username string) (string, error) {
 	return profilePic, err
 }
 
+// GetUserGrade gets a user's grade given a username.
+func (db *Database) GetUserGrade(username string) (int, error) {
+	var grade int
+	err := db.DB.Model((*models.User)(nil)).
+		Column("grade").
+		Where("username = ?", username).
+		Select(&grade)
+
+	return grade, err
+}
+
 // GetAllUsers gets all users from the database.
 func (db *Database) GetAllUsers() ([]models.User, error) {
 	var users []models.User
