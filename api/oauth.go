@@ -288,7 +288,7 @@ func (api *API) authorize(ctx *gin.Context) {
 
 	api.log.Infof("inserted token entry into database for email %s", u.Email)
 
-	// Insert the sender user into the database (if it does not already exist)
+	// Insert the new user into the database (if it does not already exist)
 	newUser, err := models.NewUser(u.Email, models.Freshman, true)
 	if api.check(err, ctx) {
 		return
@@ -300,7 +300,7 @@ func (api *API) authorize(ctx *gin.Context) {
 
 	// Get the user's grade to put in a cookies
 	uname, _ := models.UsernameFromEmail(u.Email)
-	newUser.Grade, err = api.database.GetUserGrade(string(uname))
+	grade, err := api.database.GetUserGrade(string(uname))
 	if api.check(err, ctx) {
 		return
 	}
@@ -326,7 +326,7 @@ func (api *API) authorize(ctx *gin.Context) {
 	// Set the grade in a cookie
 	http.SetCookie(ctx.Writer, &http.Cookie{
 		Name:   "grade",
-		Value:  strconv.Itoa(int(newUser.Grade)),
+		Value:  strconv.Itoa(int(grade)),
 		Path:   "/",
 		MaxAge: 30 * 60,
 		Secure: false,

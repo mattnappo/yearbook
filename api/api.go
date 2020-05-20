@@ -149,6 +149,7 @@ func (api *API) initializeRoutes() {
 		protectedRoutes.PATCH("updateUser", api.updateUser)
 		protectedRoutes.GET("getUser/:username", api.getUser)
 		protectedRoutes.GET("getUserProfilePic/:username", api.getUserProfilePic)
+		protectedRoutes.GET("getUserGrade/:username", api.getUserGrade)
 		protectedRoutes.GET("getActivity/:username", api.getActivity)
 		protectedRoutes.GET("getUserPosts/:username", api.getUserPosts)
 		protectedRoutes.GET("getUserWithAuthentication/:username", api.getUserWithAuth)

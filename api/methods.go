@@ -246,6 +246,18 @@ func (api *API) getUserProfilePic(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gr(profilePic))
 }
 
+// getUserGrade gets a user's grade
+func (api *API) getUserGrade(ctx *gin.Context) {
+	username := ctx.Param("username")
+
+	grade, err := api.database.GetUserGrade(username)
+	if api.check(err, ctx) {
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gr(grade))
+}
+
 // getUserWithAuth handles a request to get a user
 // (with authentication).
 func (api *API) getUserWithAuth(ctx *gin.Context) {
