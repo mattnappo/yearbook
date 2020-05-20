@@ -116,6 +116,15 @@ func (api *API) getnPosts(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gr(posts))
 }
 
+// getNumPosts gets the number of posts in the database
+func (api *API) getNumPosts(ctx *gin.Context) {
+	n, err := api.database.GetNumPosts()
+	if api.check(err, ctx) {
+		return
+	}
+	ctx.JSON(http.StatusOK, gr(n))
+}
+
 // getnPostsOffsets gets n posts at a certain offset.
 func (api *API) getnPostsOffset(ctx *gin.Context) {
 	// Get param data and convert to ints

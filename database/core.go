@@ -57,9 +57,15 @@ func (db *Database) GetnPostsWithOffset(
 	err := db.DB.Model(&posts).
 		Limit(n).
 		Offset(offset).
+		Order("id DESC").
 		Select()
 
 	return posts, err
+}
+
+// GetNumPosts returns the number of posts in the database.
+func (db *Database) GetNumPosts() (int, error) {
+	return db.DB.Model((*models.Post)(nil)).Count()
 }
 
 // DeletePost deletes a post from the database

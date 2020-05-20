@@ -142,6 +142,7 @@ func (api *API) initializeRoutes() {
 		protectedRoutes.POST("createPost", api.createPost)
 		protectedRoutes.GET("getPost/:id", api.getPost)
 		protectedRoutes.GET("getPosts", api.getPosts)
+		protectedRoutes.GET("getNumPosts", api.getNumPosts)
 		protectedRoutes.GET("getnPosts/:n", api.getnPosts)
 		protectedRoutes.GET("getnPostsOffset/:n/:offset", api.getnPostsOffset)
 		protectedRoutes.DELETE("deletePost/:id", api.deletePost)
