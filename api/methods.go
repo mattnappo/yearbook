@@ -116,6 +116,26 @@ func (api *API) getnPosts(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gr(posts))
 }
 
+// getnPostsOffsets gets n posts at a certain offset.
+func (api *API) getnPostsOffset(ctx *gin.Context) {
+	// Get param data and convert to ints
+	n, offset := ctx.Param("n"), ctx.Param("offset")
+	api.log.Debugf("request to get %s posts at offset %s", n, offset)
+	nInt, err := strconv.Atoi(n)
+	offsetInt, err := strconv.Atoi(offset)
+	if api.check(err, ctx) {
+		return
+	}
+
+	posts, err := api.database.GetnPostsWithOffset(nInt, offsetInt)
+	if api.check(err, ctx) {
+		return
+	}
+
+	api.log.Debugf("got %d posts at offset %d", nInt, offsetInt)
+	ctx.JSON(http.StatusOK, gr(posts))
+}
+
 // deletePost deletes a post.
 func (api *API) deletePost(ctx *gin.Context) {
 	postID := ctx.Param("id")

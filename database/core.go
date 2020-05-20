@@ -49,6 +49,19 @@ func (db *Database) GetnPosts(n int) ([]models.Post, error) {
 	return posts, nil
 }
 
+// GetnPostsWithOffset gets n posts at a ceratin offset.
+func (db *Database) GetnPostsWithOffset(
+	n, offset int,
+) ([]models.Post, error) {
+	var posts []models.Post
+	err := db.DB.Model(&posts).
+		Limit(n).
+		Offset(offset).
+		Select()
+
+	return posts, err
+}
+
 // DeletePost deletes a post from the database
 func (db *Database) DeletePost(postID string) error {
 	db.mux.Lock()
@@ -89,9 +102,7 @@ func (db *Database) UpdateUser(user *models.User) error {
 	if user.Will != "" {
 		lookupUser.Will = user.Will
 	}
-	if user.Grade != 0 {
-		lookupUser.Grade = user.Grade
-	}
+	lookupUser.Grade = user.Grade
 	// if user.ProfilePic != nil {
 	// 	lookupUser.ProfilePic = user.ProfilePic
 	// }
