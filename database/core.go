@@ -42,7 +42,7 @@ func (db *Database) GetAllPosts() ([]models.Post, error) {
 // GetnPosts gets n posts from the database.
 func (db *Database) GetnPosts(n int) ([]models.Post, error) {
 	var posts []models.Post
-	err := db.DB.Model(&posts).Order("id ASC").Limit(n).Select()
+	err := db.DB.Model(&posts).Order("id DESC").Limit(n).Select()
 	if err != nil {
 		return nil, err
 	}
@@ -218,8 +218,8 @@ func (db *Database) GetUserProfilePic(username string) (string, error) {
 }
 
 // GetUserGrade gets a user's grade given a username.
-func (db *Database) GetUserGrade(username string) (int, error) {
-	var grade int
+func (db *Database) GetUserGrade(username string) (models.Grade, error) {
+	var grade models.Grade
 	err := db.DB.Model((*models.User)(nil)).
 		Column("grade").
 		Where("username = ?", username).

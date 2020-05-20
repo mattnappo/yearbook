@@ -299,9 +299,8 @@ func (api *API) authorize(ctx *gin.Context) {
 	api.database.AddUser(newUser)
 
 	// Get the user's grade to put in a cookies
-	newUser.Grade, err = api.database.GetUserGrade(
-		models.UsernameFromEmail(u.Email),
-	)
+	uname, _ := models.UsernameFromEmail(u.Email)
+	newUser.Grade, err = api.database.GetUserGrade(string(uname))
 	if api.check(err, ctx) {
 		return
 	}
