@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path"
-	"strconv"
 	"strings"
 
 	"github.com/gin-contrib/sessions"
@@ -298,13 +297,6 @@ func (api *API) authorize(ctx *gin.Context) {
 	// decide whether or not to add the user. AddUserIfNotExists maybe.
 	api.database.AddUser(newUser)
 
-	// Get the user's grade to put in a cookies
-	uname, _ := models.UsernameFromEmail(u.Email)
-	grade, err := api.database.GetUserGrade(string(uname))
-	if api.check(err, ctx) {
-		return
-	}
-
 	api.log.Infof("added user %s to database (in authorization)", u.Email)
 
 	// Set the token in a cookie
@@ -319,14 +311,6 @@ func (api *API) authorize(ctx *gin.Context) {
 	http.SetCookie(ctx.Writer, &http.Cookie{
 		Name:   "username",
 		Value:  string(newUser.Username),
-		Path:   "/",
-		MaxAge: 30 * 60,
-		Secure: false,
-	})
-	// Set the grade in a cookie
-	http.SetCookie(ctx.Writer, &http.Cookie{
-		Name:   "grade",
-		Value:  strconv.Itoa(int(grade)),
 		Path:   "/",
 		MaxAge: 30 * 60,
 		Secure: false,
