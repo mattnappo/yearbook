@@ -234,6 +234,26 @@ func (db *Database) GetUserProfilePic(username string) (string, error) {
 	return profilePic, err
 }
 
+// GetProfilePics gets a list of profile pics given usernames.
+func (db *Database) GetProfilePics(posts []models.Post) ([]string, error) {
+	var profilePics []string
+	// Get all of the usernames
+	for _, post := range posts {
+		// Get the user's profile pick
+		var profilePic string
+		err := db.DB.Model((*models.User)(nil)).
+			Column("profile_pic").
+			Where("username = ?", post.Sender).
+			Select(&profilePic)
+		if err != nil {
+			return []string{}, err
+		}
+
+		profilePics = append(profilePics, profilePic)
+	}
+	return profilePics, nil
+}
+
 // GetUserGrade gets a user's grade given a username.
 func (db *Database) GetUserGrade(username string) (models.Grade, error) {
 	var grade models.Grade

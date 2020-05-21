@@ -44,6 +44,12 @@ type loginResponse struct {
 	State string `json:"state"`
 }
 
+// activityResponse is the response of a request to get a user's activity.
+type activityResponse struct {
+	Activity    []models.Post `json:"activity"`     // The activity posts
+	ProfilePics []string      `json:"profile_pics"` // The profile pics of the senders
+}
+
 // inboundOutboundResponse is the response of a getUserPosts/:username request
 type inboundOutboundResponse struct {
 	Inbound  []models.Post `json:"inbound"`

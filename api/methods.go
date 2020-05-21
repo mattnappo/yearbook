@@ -379,13 +379,23 @@ func (api *API) getActivity(ctx *gin.Context) {
 
 	api.log.Infof("authenticated %s", username)
 
+	// Get the inbound posts
 	inboundPosts, err := api.database.GetUserInbound(username)
 	if api.check(err, ctx) {
 		return
 	}
 
+	// Get the profile pics
+	profilePics, err := api.database.GetProfilePics(inboundPosts)
+	if api.check(err, ctx) {
+		return
+	}
+
 	api.log.Infof("got %s's inbound posts", username)
-	ctx.JSON(http.StatusOK, gr(inboundPosts))
+	ctx.JSON(
+		http.StatusOK,
+		activityResponse{inboundPosts, profilePics},
+	)
 }
 
 // getUserPosts gets the inbound and outbound posts of a user.
