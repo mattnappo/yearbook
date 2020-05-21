@@ -68,10 +68,72 @@ func (db *Database) GetNumPosts() (int, error) {
 	return db.DB.Model((*models.Post)(nil)).Count()
 }
 
+// removeInboundPost deletes the given postID from the slice of
+// inbound posts given a username.
+func (db *Database) removeInboundPost(
+	username models.Username, // The user to delete it from
+	postID string, // The post to delete
+) error {
+	// Get the inbound posts
+	var inboundPosts []string
+	err := db.DB.Model((*models.User)(nil)).
+		Column("inbound_posts").
+		Where("username = ?", string(username)).
+		Select(&inboundPosts)
+	if err != nil {
+		return err
+	}
+
+	// Remove the unwanted postID from the array
+	var newInboundPosts []string
+	for _, inboundPost := range inboundPosts {
+		if inboundPost != postID {
+			newInboundPosts = append(newInboundPosts, inboundPost)
+		}
+	}
+
+	// Update the array in the database with the newInboundPosts
+	err = db.DB.Model((*models.User)(nil)).
+		Set("inbound_posts = ?", newInboundPosts).
+		Where("username = ?", string(username)).
+		Update()
+	return err
+}
+
 // DeletePost deletes a post from the database
 func (db *Database) DeletePost(postID string) error {
 	db.mux.Lock()
 	defer db.mux.Unlock()
+
+	// Get the post. We are going to need some data from it.
+	post, err := db.GetPost(postID)
+	if err != nil {
+		return err
+	}
+
+	// Get the sender's outbound posts
+	var senderOutboundPosts []string
+	err = db.DB.Model((*models.User)(nil)).
+		Column("outbound_posts").
+		Where("username = ?", post.Sender).
+		Select(&senderOutboundPosts)
+
+	// Remove the postID from the slide of outbound posts
+	var newSenderOutboundPosts []string
+	for _, outboundPost := range senderOutboundPosts {
+		if outboundPost != postID {
+			newSenderOutboundPosts = append(
+				newSenderOutboundPosts,
+				outboundPost,
+			)
+		}
+	}
+
+	// Remove the postID from the inbound slices of all the
+	// recipients
+	for _, recipient := range post.Recipients {
+		err := db.removeInboundPost(recipient, postID)
+	}
 
 	_, err := db.DB.Model(&models.Post{}).
 		Where("post.post_id = ?", postID).
