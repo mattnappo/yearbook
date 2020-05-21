@@ -81,7 +81,7 @@ func TestDeletePost(t *testing.T) {
 	db := Connect(false)
 	defer db.Disconnect()
 
-	uid := "c596d281587fa801d1329558f39f9792a9a96ca9bf75f18296a8172b46393403"
+	uid := "5d31429023d890336239811e4b1aa35f21b3783b9d1b99f6bf0c69007887dcd1"
 	err := db.DeletePost(uid)
 	if err != nil {
 		t.Fatal(err)

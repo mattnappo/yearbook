@@ -75,7 +75,7 @@ func (db *Database) removeInboundPost(
 	postID string, // The post to delete
 ) error {
 	// Get the inbound posts
-	var inboundPosts []string
+	var inboundPosts models.User
 	err := db.DB.Model((*models.User)(nil)).
 		Column("inbound_posts").
 		Where("username = ?", string(username)).
@@ -86,14 +86,14 @@ func (db *Database) removeInboundPost(
 
 	// Remove the unwanted postID from the array
 	var newInboundPosts []string
-	for _, inboundPost := range inboundPosts {
+	for _, inboundPost := range inboundPosts.InboundPosts {
 		if inboundPost != postID {
 			newInboundPosts = append(newInboundPosts, inboundPost)
 		}
 	}
 
 	// Update the array in the database with the newInboundPosts
-	err = db.DB.Model((*models.User)(nil)).
+	_, err = db.DB.Model((*models.User)(nil)).
 		Set("inbound_posts = ?", newInboundPosts).
 		Where("username = ?", string(username)).
 		Update()
@@ -112,7 +112,7 @@ func (db *Database) DeletePost(postID string) error {
 	}
 
 	// Get the sender's outbound posts
-	var senderOutboundPosts []string
+	var senderOutboundPosts models.User
 	err = db.DB.Model((*models.User)(nil)).
 		Column("outbound_posts").
 		Where("username = ?", post.Sender).
@@ -120,7 +120,7 @@ func (db *Database) DeletePost(postID string) error {
 
 	// Remove the postID from the slide of outbound posts
 	var newSenderOutboundPosts []string
-	for _, outboundPost := range senderOutboundPosts {
+	for _, outboundPost := range senderOutboundPosts.OutboundPosts {
 		if outboundPost != postID {
 			newSenderOutboundPosts = append(
 				newSenderOutboundPosts,
@@ -129,13 +129,26 @@ func (db *Database) DeletePost(postID string) error {
 		}
 	}
 
+	// Update the sender outbound posts in the database
+	_, err = db.DB.Model((*models.User)(nil)).
+		Set("outbound_posts = ?", newSenderOutboundPosts).
+		Where("username = ?", string(post.Sender)).
+		Update()
+	if err != nil {
+		return err
+	}
+
 	// Remove the postID from the inbound slices of all the
 	// recipients
 	for _, recipient := range post.Recipients {
 		err := db.removeInboundPost(recipient, postID)
+		if err != nil {
+			return err
+		}
 	}
 
-	_, err := db.DB.Model(&models.Post{}).
+	// Delete the post itself from the post database
+	_, err = db.DB.Model(&models.Post{}).
 		Where("post.post_id = ?", postID).
 		Delete()
 	return err
