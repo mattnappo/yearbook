@@ -150,7 +150,18 @@ func (api *API) deletePost(ctx *gin.Context) {
 	postID := ctx.Param("id")
 	api.log.Infof("request to delete post %s", postID)
 
-	err := api.database.DeletePost(postID)
+	username, err := ctx.Cookie("username")
+	if api.check(err, ctx, http.StatusUnauthorized) {
+		return
+	}
+
+	// Authenticate the req
+	err = api.authenticate(ctx, username)
+	if api.check(err, ctx, http.StatusUnauthorized) {
+		return
+	}
+
+	err = api.database.DeletePost(postID)
 	if api.check(err, ctx) {
 		return
 	}
