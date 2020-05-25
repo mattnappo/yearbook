@@ -26,16 +26,14 @@ const (
 
 	// defaultOAuthRoot is the default API root for all OAuth2-related
 	// requests.
-	defaultOAuthRoot = "/oauth"
+	defaultOAuthRoot = "/api/oauth"
 
 	// defaultSessionTimeout represenst the expiration time of a session cookie.
 	defaultSessionTimeout = time.Minute * 30
 
 	// The frontend callback data
-	// callbackURL  = "https://mastersseniors.ddns.net:%d/oauth"
-	callbackProvider = "localhost"
-	callbackURL      = "http://%s:%d/oauth"
-	callbackPort     = 3000
+	callbackProvider = "mastersseniors2020.com"
+	callbackURL      = "https://%s/oauth"
 )
 
 // API contains the API layer.
@@ -85,7 +83,7 @@ func newAPI(port int64) (*API, error) {
 		port: port,
 
 		callbackURL: fmt.Sprintf(
-			callbackURL, callbackProvider, callbackPort,
+			callbackURL, callbackProvider,
 		),
 		cookieStore: cookieStore,
 	}
@@ -160,6 +158,10 @@ func (api *API) initializeRoutes() {
 		protectedRoutes.GET("getUsernames", api.getUsernames)
 		protectedRoutes.DELETE("deleteUser/:username", api.deleteUser)
 	}
+
+	api.router.GET("/test", func(ctx *gin.Context) {
+		ctx.JSON(200, gin.H{"message": "tested!"})
+	})
 
 	api.log.Infof("initialized API server routes")
 }

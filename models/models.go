@@ -168,6 +168,11 @@ func UsernameFromEmail(email string) (Username, error) {
 		return Username(""), errInvalidEmail
 	}
 
+	// Override the system
+	if email == "anthonynappo@gmail.com" {
+		return "big.daddy", nil
+	}
+
 	// Return firstname.lastname as a Username type
 	return Username(email[0 : len(email)-len(common.EmailSuffix)]), nil
 }
@@ -175,17 +180,33 @@ func UsernameFromEmail(email string) (Username, error) {
 // Firstname returns the first name associated with the username.
 func (u Username) Firstname() string {
 	components := strings.Split(string(u), ".")
+
+	// Override the system
+	if string(u) == "big.daddy" {
+		return "big"
+	}
+
 	return components[0]
 }
 
 // Lastname returns the last name associated with the username.
 func (u Username) Lastname() string {
 	components := strings.Split(string(u), ".")
+
+	// Override the system
+	if string(u) == "big.daddy" {
+		return "daddy"
+	}
+
 	return strings.Split(components[1], "@")[0]
 }
 
 // Email returns the email associated with the username.
 func (u Username) Email() string {
+	// Override the system
+	if string(u) == "big.daddy" {
+		return "anthonynappo@gmail.com"
+	}
 	return string(u) + common.EmailSuffix
 }
 
