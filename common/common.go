@@ -26,9 +26,6 @@ const (
 	// MaxEmailLength is the maximum amount of characters in an email.
 	MaxEmailLength = 255
 
-	// DatabaseName is the name of the Postgres database.
-	DatabaseName = "seniors_testnet"
-
 	// LogsDir is the location where all log files are stored.
 	LogsDir = "./data/logs"
 
@@ -37,6 +34,11 @@ const (
 
 	// envFile is the path to the file containing needed environment variables.
 	envFile = "./.env"
+)
+
+var (
+	// DatabaseName is the name of the Postgres database.
+	DatabaseName = GetEnv("DATABASE_NAME")
 )
 
 // CreateDirIfDoesNotExist creates a directory if it does not already exist.

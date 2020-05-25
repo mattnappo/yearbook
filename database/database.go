@@ -2,6 +2,8 @@ package database
 
 import (
 	"errors"
+	"io/ioutil"
+	"strings"
 	"sync"
 
 	"github.com/go-pg/pg/v9"
@@ -63,6 +65,36 @@ func (db *Database) CreateSchema() error {
 		(*models.Post)(nil), // make the posts table
 		(*token)(nil)} {     // make the tokens table
 		err := db.DB.CreateTable(model, nil)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// AddSeniors adds all the seinors into the database.
+func (db *Database) AddSeniors() error {
+	// Make a list of all the senior usernames
+	rawSeniors, err := ioutil.ReadFile("seniors.txt")
+	if err != nil {
+		return err
+	}
+	seniors := strings.Split(string(rawSeniors), "\n")
+
+	// Add each senior to the database
+	for _, senior := range seniors {
+		// Make the senior account
+		seniorAccount, err := models.NewUser(
+			senior,
+			models.Senior,
+			false,
+		)
+		if err != nil {
+			return err
+		}
+
+		// Add the senior to the database
+		err = db.AddUser(seniorAccount)
 		if err != nil {
 			return err
 		}

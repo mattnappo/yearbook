@@ -30,10 +30,13 @@ const (
 
 	// defaultSessionTimeout represenst the expiration time of a session cookie.
 	defaultSessionTimeout = time.Minute * 30
+)
 
+var (
+	protocol = common.GetEnv("PROTOCOL")
 	// The frontend callback data
-	callbackProvider = "mastersseniors2020.com"
-	callbackURL      = "https://%s/oauth"
+	callbackProvider = common.GetEnv("PROVIDER")
+	callbackURL      = "%s://%s/oauth"
 )
 
 // API contains the API layer.
@@ -83,7 +86,7 @@ func newAPI(port int64) (*API, error) {
 		port: port,
 
 		callbackURL: fmt.Sprintf(
-			callbackURL, callbackProvider,
+			callbackURL, protocol, callbackProvider,
 		),
 		cookieStore: cookieStore,
 	}
