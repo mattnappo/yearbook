@@ -2,6 +2,7 @@ package database
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"strings"
 	"sync"
@@ -82,7 +83,8 @@ func (db *Database) AddSeniors() error {
 	seniors := strings.Split(string(rawSeniors), "\n")
 
 	// Add each senior to the database
-	for _, senior := range seniors {
+	for i, senior := range seniors {
+		fmt.Printf("[%3d] %s\n", i, senior)
 		// Make the senior account
 		seniorAccount, err := models.NewUser(
 			senior,

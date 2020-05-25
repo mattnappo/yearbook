@@ -158,7 +158,7 @@ func UsernameFromEmail(email string) (Username, error) {
 	// Check that the email is not too long
 	if len(email) > common.MaxEmailLength || len(email) <=
 		len(common.EmailSuffix) {
-		return Username(""), errors.New("email is too long or too short")
+		return Username(""), fmt.Errorf("email %s is too long or too short", email)
 	}
 
 	// Check that the email suffix is at the end and that there is only one first
