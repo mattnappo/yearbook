@@ -27,10 +27,13 @@ const (
 	MaxEmailLength = 255
 
 	// DatabaseName is the name of the Postgres database.
-	DatabaseName = "new_tests"
+	DatabaseName = "seniors_testnet"
 
 	// LogsDir is the location where all log files are stored.
 	LogsDir = "./data/logs"
+
+	// APIPort represents the default api server port
+	APIPort = 8081
 
 	// envFile is the path to the file containing needed environment variables.
 	envFile = "./.env"

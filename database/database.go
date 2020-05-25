@@ -2,13 +2,11 @@ package database
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 
 	"github.com/go-pg/pg/v9"
 	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/models"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 type connStatus int
@@ -37,20 +35,9 @@ type Database struct {
 
 // Connect connects to the database.
 func Connect(fromStdin bool) *Database {
-	var password string
-	if fromStdin { // Read password from stdin
-		fmt.Printf("Password: ")
-		stdinPassword, _ := terminal.ReadPassword(0)
-		fmt.Printf("\n")
-		password = string(stdinPassword)
-	} else { // Read password from disk
-		password = common.GetEnv("DB_PASSWORD")
-	}
-
-	// Connect to db
 	db := pg.Connect(&pg.Options{
 		User:     "postgres",
-		Password: string(password),
+		Password: common.GetEnv("DB_PASSWORD"),
 		Database: common.DatabaseName,
 	})
 	return &Database{db, CONNECTED, sync.Mutex{}}

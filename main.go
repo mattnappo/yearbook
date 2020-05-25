@@ -5,12 +5,13 @@ import (
 	"fmt"
 
 	"github.com/xoreo/yearbook/api"
+	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/database"
 )
 
 var (
 	createSchemaFlag = flag.Bool("create-schema", false, "create the database schema")
-	apiPort          = flag.Int64("start-api", 8081, "start the API server on a given port")
+	apiPort          = flag.Int64("start-api", common.APIPort, "start the API server on a given port")
 )
 
 func main() {
