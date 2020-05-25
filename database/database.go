@@ -95,6 +95,10 @@ func (db *Database) AddSeniors() error {
 			return err
 		}
 
+		if senior != "charlie.loigman@mastersny.org" {
+			continue
+		}
+
 		// Add the senior to the database
 		err = db.AddUser(seniorAccount)
 		if err != nil {

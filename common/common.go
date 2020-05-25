@@ -47,6 +47,9 @@ var (
 
 	// NotifPassword is the password for the gmail account that sends notifications.
 	NotifPassword = GetEnv("NOTIF_PASSWORD")
+
+	// NotifsEnabled turns email notifications on or off.
+	NotifsEnabled = false
 )
 
 // CreateDirIfDoesNotExist creates a directory if it does not already exist.

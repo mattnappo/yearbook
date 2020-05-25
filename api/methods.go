@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/models"
 )
 
@@ -77,7 +78,9 @@ func (api *API) createPost(ctx *gin.Context) {
 	}
 
 	// Send an email notification
-	go api.sendNotification(post.Sender, post.Recipients)
+	if common.NotifsEnabled {
+		go api.sendNotification(post.Sender, post.Recipients)
+	}
 
 	api.log.Infof("created new post %s", post.String())
 	ctx.JSON(http.StatusOK, ok())

@@ -274,11 +274,15 @@ func (api *API) sendNotification(
 
 	// Setup the message
 	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	to := []string{recipients[0].Email()}
+
+	var to []string
+	for _, recip := range recipients {
+		to = append(to, recip.Email())
+	}
 	msg := fmt.Sprintf("To: %s\r\nSubject: %s Congratulated you!\r\n"+
 		mime+"\r\n"+
 		"%s\r\n",
-		recipients[0].Email(),
+		strings.Join(to, ","),
 		sender.Name(),
 		htmlBody,
 	)

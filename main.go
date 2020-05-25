@@ -12,6 +12,7 @@ import (
 var (
 	createSchemaFlag = flag.Bool("create-schema", false, "create the database schema")
 	addSeniorsFlag   = flag.Bool("add-seniors", false, "add the seniors to the database")
+	notifsFlag       = flag.Bool("with-notifs", false, "enable email notifications")
 	apiPort          = flag.Int64("start-api", common.APIPort, "start the API server on a given port")
 )
 
@@ -36,6 +37,10 @@ func main() {
 			panic(err)
 		}
 		fmt.Println("added the seniors to the database")
+	}
+
+	if *notifsFlag {
+		common.NotifsEnabled = true
 	}
 
 	if *apiPort > 0 {
