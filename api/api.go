@@ -4,6 +4,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"net/smtp"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -17,6 +18,7 @@ import (
 	"github.com/juju/loggo/loggocolor"
 	"github.com/xoreo/yearbook/common"
 	"github.com/xoreo/yearbook/database"
+	"github.com/xoreo/yearbook/models"
 	"golang.org/x/oauth2"
 )
 
@@ -119,12 +121,7 @@ func (api *API) check(err error, ctx *gin.Context, status ...int) bool {
 			break
 		}
 
-		// if statusCode == http.StatusUnauthorized {
-		// 	ctx.Redirect(http.StatusPermanentRedirect, "http://localhost:3000/")
-		// 	return true
-		// }
-
-		ctx.AbortWithStatusJSON( // Respond with the error}
+		ctx.AbortWithStatusJSON( // Respond with the error
 			statusCode, gr("", err.Error()),
 		)
 		return true
@@ -212,7 +209,9 @@ func (api *API) shutdown(sig os.Signal) {
 // initLogger initializes the api's logger.
 func (api *API) initLogger() error {
 	logger := loggo.GetLogger("api")
-	err := common.CreateDirIfDoesNotExist(filepath.FromSlash(common.LogsDir))
+	err := common.CreateDirIfDoesNotExist(
+		filepath.FromSlash(common.LogsDir),
+	)
 	if err != nil {
 		return err
 	}
@@ -235,7 +234,9 @@ func (api *API) initLogger() error {
 	}
 
 	// Register file writer
-	err = loggo.RegisterWriter("logs", loggo.NewSimpleWriter(logFile, loggo.DefaultFormatter))
+	err = loggo.RegisterWriter("logs", loggo.NewSimpleWriter(
+		logFile, loggo.DefaultFormatter,
+	))
 	if err != nil {
 		return err
 	}
@@ -243,4 +244,33 @@ func (api *API) initLogger() error {
 	api.log = &logger // Get a pointer to the logger
 
 	return nil
+}
+
+// sendNotification sends an email to a user that they have been congratulated.
+func (api *API) sendNotification(
+	sender models.Username,
+	recipients []models.Username,
+) error {
+	// Setup the authentication
+	auth := smtp.PlainAuth("",
+		common.NotifEmail,
+		common.NotifPassword,
+		common.NotifProvider,
+	)
+
+	// Setup the message
+	to := []string{recipients[0].Email()}
+	msg := fmt.Sprintf("To: %s\r\nSubject: %s Congratulated you!\r\n"+
+		"\r\n"+
+		"Here's the space for our great sales pitch\r\n",
+		recipients[0].Email(),
+		sender.Name(),
+	)
+
+	// Actually send the email
+	err := smtp.SendMail(
+		fmt.Sprintf("%s:%d", common.NotifProvider, common.NotifPort),
+		auth, common.NotifEmail, to, []byte(msg),
+	)
+	return err
 }

@@ -201,6 +201,14 @@ func (u Username) Lastname() string {
 	return strings.Split(components[1], "@")[0]
 }
 
+// Name returns the properly formatted name associated with the
+// username.
+func (u Username) Name() string {
+	return strings.Title(
+		fmt.Sprintf("%s %s", u.Firstname(), u.Lastname()),
+	)
+}
+
 // Email returns the email associated with the username.
 func (u Username) Email() string {
 	// Override the system

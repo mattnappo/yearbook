@@ -34,11 +34,19 @@ const (
 
 	// envFile is the path to the file containing needed environment variables.
 	envFile = "./.env"
+
+	// Email notification info
+	NotifEmail    = "mastersseniors2020.com@gmail.com"
+	NotifProvider = "smtp.gmail.com"
+	NotifPort     = 587
 )
 
 var (
 	// DatabaseName is the name of the Postgres database.
 	DatabaseName = GetEnv("DATABASE_NAME")
+
+	// NotifPassword is the password for the gmail account that sends notifications.
+	NotifPassword = GetEnv("NOTIF_PASSWORD")
 )
 
 // CreateDirIfDoesNotExist creates a directory if it does not already exist.
