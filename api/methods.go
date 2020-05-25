@@ -76,10 +76,9 @@ func (api *API) createPost(ctx *gin.Context) {
 		return
 	}
 
-	err = api.sendNotification(post.Sender, post.Recipients)
-	if api.check(err, ctx) {
-		return
-	}
+	// Send an email notification
+	go api.sendNotification(post.Sender, post.Recipients)
+
 	api.log.Infof("created new post %s", post.String())
 	ctx.JSON(http.StatusOK, ok())
 }

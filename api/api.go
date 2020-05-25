@@ -3,12 +3,14 @@ package api
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/smtp"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/sessions"
@@ -246,7 +248,17 @@ func (api *API) initLogger() error {
 	return nil
 }
 
-// sendNotification sends an email to a user that they have been congratulated.
+// genEmailBody generates the body of a notification email given
+// a sender's username.
+func genEmailBody(sender string) string {
+	emailTemplate, _ := ioutil.ReadFile("email.txt")
+	return strings.ReplaceAll(
+		string(emailTemplate), "$$$SENDER$$$", sender,
+	)
+}
+
+// sendNotification sends an email to a user that they have
+// been congratulated.
 func (api *API) sendNotification(
 	sender models.Username,
 	recipients []models.Username,
@@ -258,13 +270,17 @@ func (api *API) sendNotification(
 		common.NotifProvider,
 	)
 
+	htmlBody := genEmailBody(sender.Name())
+
 	// Setup the message
+	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	to := []string{recipients[0].Email()}
 	msg := fmt.Sprintf("To: %s\r\nSubject: %s Congratulated you!\r\n"+
-		"\r\n"+
-		"Here's the space for our great sales pitch\r\n",
+		mime+"\r\n"+
+		"%s\r\n",
 		recipients[0].Email(),
 		sender.Name(),
+		htmlBody,
 	)
 
 	// Actually send the email
