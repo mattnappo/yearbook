@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/xoreo/yearbook/models"
@@ -26,6 +27,15 @@ func (api *API) createPost(ctx *gin.Context) {
 	err = api.authenticate(ctx, request.Sender)
 	if api.check(err, ctx, http.StatusUnauthorized) {
 		return
+	}
+
+	// Make sure that there are no curse words
+	lowerMessage := strings.ToLower(request.Message)
+	for _, curse := range curses {
+		if strings.Contains(lowerMessage, curse) {
+			ctx.JSON(http.StatusOK, gr(nil, "curse word"))
+			return
+		}
 	}
 
 	// Create the new post
