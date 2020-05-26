@@ -147,7 +147,7 @@ func (api *API) initializeRoutes() {
 		protectedRoutes.GET("getnPostsOffset/:n/:offset", api.getnPostsOffset)
 		protectedRoutes.DELETE("deletePost/:id", api.deletePost)
 
-		protectedRoutes.POST("createUser", api.createUser)
+		// protectedRoutes.POST("createUser", api.createUser)
 		protectedRoutes.PATCH("updateUser", api.updateUser)
 		protectedRoutes.GET("getUser/:username", api.getUser)
 		protectedRoutes.GET("getUserProfilePic/:username", api.getUserProfilePic)
@@ -158,7 +158,7 @@ func (api *API) initializeRoutes() {
 		protectedRoutes.GET("getUsers", api.getUsers)
 		protectedRoutes.GET("getSeniors", api.getSeniors)
 		protectedRoutes.GET("getUsernames", api.getUsernames)
-		protectedRoutes.DELETE("deleteUser/:username", api.deleteUser)
+		// protectedRoutes.DELETE("deleteUser/:username", api.deleteUser)
 	}
 
 	api.router.GET("/test", func(ctx *gin.Context) {
