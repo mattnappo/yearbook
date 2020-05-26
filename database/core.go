@@ -377,6 +377,16 @@ func (db *Database) DeleteUser(username string) error {
 	return err
 }
 
+// InitAccount initializes a new account.
+func (db *Database) InitAccount(username, picture string) error {
+	_, err := db.DB.Model((*models.User)(nil)).
+		Set("profile_pic = ?", picture).
+		Set("registered = true").
+		Where("username = ?", username).
+		Update()
+	return err
+}
+
 // checkIntegrity checks the integrity of a postgres model function return.
 func checkIntegrity(err error) error {
 	// Return the error as long as it is not a duplicate key violation.

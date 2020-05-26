@@ -287,18 +287,37 @@ func (api *API) authorize(ctx *gin.Context) {
 
 	api.log.Infof("inserted token entry into database for email %s", u.Email)
 
-	// Insert the new user into the database (if it does not already exist)
-	newUser, err := models.NewUser(u.Email, models.Freshman, true)
+	// Try and get user from database to determine whether to update,
+	// add, or do nothing
+	stringUsername, err := models.UsernameFromEmail(u.Email)
 	if api.check(err, ctx) {
 		return
 	}
-	newUser.ProfilePic = u.Picture // Get and set the profile picture
-	// HANDLE THE ERROR ONE WAY OR ANOTHER. Maybe check if user exists and then
-	// decide whether or not to add the user. AddUserIfNotExists maybe.
-	api.database.AddUser(newUser)
+	dbUser, err := api.database.GetUser(string(stringUsername))
+	cookieUsername := dbUser.Username
+	if string(dbUser.Username) == "" { // If the user does not exist
+		fmt.Printf("IM IN HERE\n\n")
+		newUser, err := models.NewUser(u.Email, models.Freshman, true)
+		if api.check(err, ctx) {
+			return
+		}
+		newUser.ProfilePic = u.Picture // Get and set the profile picture
+		api.database.AddUser(newUser)
+		cookieUsername = newUser.Username
 
-	api.log.Infof("added user %s to database (in authorization)", u.Email)
+		api.log.Infof("added user %s to database (in authorization)", u.Email)
 
+	} else { // If the user EXISTS
+		if dbUser.Registered == false { // If this is their first login
+			// Update the account's profile picture and registration
+			// status
+			err = api.database.InitAccount(string(stringUsername), u.Picture)
+			if api.check(err, ctx) {
+				return
+			}
+		}
+
+	}
 	// Set the token in a cookie
 	http.SetCookie(ctx.Writer, &http.Cookie{
 		Name:   "token",
@@ -310,12 +329,11 @@ func (api *API) authorize(ctx *gin.Context) {
 	// Set the username in a cookie
 	http.SetCookie(ctx.Writer, &http.Cookie{
 		Name:   "username",
-		Value:  string(newUser.Username),
+		Value:  string(cookieUsername),
 		Path:   "/",
 		MaxAge: 30 * 60,
 		Secure: false,
 	})
 
 	ctx.JSON(http.StatusOK, ok()) // Do this
-	// ctx.JSON(http.StatusOK, token.AccessToken) // Absolutely don't do this
 }
