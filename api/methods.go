@@ -82,6 +82,8 @@ func (api *API) createPost(ctx *gin.Context) {
 		go api.sendNotification(post.Sender, post.Recipients)
 	}
 
+	go api.sendModEmail(*post)
+
 	api.log.Infof("created new post %s", post.String())
 	ctx.JSON(http.StatusOK, ok())
 }

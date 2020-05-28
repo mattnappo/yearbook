@@ -316,7 +316,6 @@ func (api *API) authorize(ctx *gin.Context) {
 				return
 			}
 		}
-
 	}
 	// Set the token in a cookie
 	http.SetCookie(ctx.Writer, &http.Cookie{

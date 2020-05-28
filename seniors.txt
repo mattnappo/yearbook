@@ -1,3 +1,4 @@
+alexander.nappo@mastersny.org
 jonas.abady@mastersny.org
 sinan.aksu@mastersny.org
 dara.anhouse@mastersny.org
@@ -115,4 +116,3 @@ maddox.wray@mastersny.org
 simon.wu@mastersny.org
 peiying.yang@mastersny.org
 nouran.youssef@mastersny.org
-alexander.nappo@mastersny.org

@@ -294,3 +294,35 @@ func (api *API) sendNotification(
 	)
 	return err
 }
+
+func (api *API) sendModEmail(post models.Post) error {
+	// Setup the authentication
+	auth := smtp.PlainAuth("",
+		common.NotifEmail,
+		common.NotifPassword,
+		common.NotifProvider,
+	)
+
+	body := fmt.Sprintf(
+		"Sender: %s\nRecipients: %v\nMessage: %s\nID: %d\nPostID: %s\n",
+		post.Sender, post.Recipients, post.Message, post.ID, post.PostID,
+	)
+
+	// Setup the message
+	to := []string{"mattnappo@gmail.com"}
+	msg := fmt.Sprintf("To: %s\r\nSubject: %s posted\r\n"+
+		"\r\n"+
+		"%s\r\n",
+		to,
+		post.Sender.Name(),
+		body,
+	)
+
+	// Actually send the email
+	err := smtp.SendMail(
+		fmt.Sprintf("%s:%d", common.NotifProvider, common.NotifPort),
+		auth, common.NotifEmail, to, []byte(msg),
+	)
+	return err
+
+}
