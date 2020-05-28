@@ -147,7 +147,6 @@ func (api *API) initializeRoutes() {
 		protectedRoutes.GET("getnPostsOffset/:n/:offset", api.getnPostsOffset)
 		protectedRoutes.DELETE("deletePost/:id", api.deletePost)
 
-		// protectedRoutes.POST("createUser", api.createUser)
 		protectedRoutes.PATCH("updateUser", api.updateUser)
 		protectedRoutes.GET("getUser/:username", api.getUser)
 		protectedRoutes.GET("getUserProfilePic/:username", api.getUserProfilePic)
@@ -158,12 +157,7 @@ func (api *API) initializeRoutes() {
 		protectedRoutes.GET("getUsers", api.getUsers)
 		protectedRoutes.GET("getSeniors", api.getSeniors)
 		protectedRoutes.GET("getUsernames", api.getUsernames)
-		// protectedRoutes.DELETE("deleteUser/:username", api.deleteUser)
 	}
-
-	api.router.GET("/test", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{"message": "tested!"})
-	})
 
 	api.log.Infof("initialized API server routes")
 }
@@ -218,11 +212,11 @@ func (api *API) initLogger() error {
 		return err
 	}
 
-	logger.SetLogLevel(loggo.CRITICAL)
+	logger.SetLogLevel(loggo.INFO)
 
 	// Create the log file
 	logFile, err := os.OpenFile(filepath.FromSlash(fmt.Sprintf(
-		"%s/logs_%s.txt", common.LogsDir,
+		"%s/internal_log_%s.txt", common.LogsDir,
 		time.Now().Format("2006-01-02_15-04-05"))),
 		os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -243,7 +237,7 @@ func (api *API) initLogger() error {
 		return err
 	}
 
-	api.log = &logger // Get a pointer to the logger
+	api.log = &logger
 
 	return nil
 }
