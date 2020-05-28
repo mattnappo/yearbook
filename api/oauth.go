@@ -68,7 +68,6 @@ func (api *API) getLoginURL(state string) string {
 
 // getUserInfo querys the Google API to get user info given a token.
 func (api *API) getUserInfo(token *oauth2.Token) (user, error) {
-	api.log.Infof("querying Google API to get userinfo")
 	client := api.oauthConfig.Client(oauth2.NoContext, token)
 
 	// Query the Google API to get information about the user
@@ -83,7 +82,6 @@ func (api *API) getUserInfo(token *oauth2.Token) (user, error) {
 	if err != nil {
 		return user{}, err
 	}
-	api.log.Infof("got client data %s", string(userinfo))
 
 	// Parse client data
 	u := user{}
@@ -97,7 +95,6 @@ func (api *API) getUserInfo(token *oauth2.Token) (user, error) {
 		return user{}, errors.New("invalid credentials to query Google API")
 	}
 
-	api.log.Debugf("parsed client info %v", u)
 	return u, nil
 }
 
@@ -116,7 +113,6 @@ func extractBearerToken(ctx *gin.Context) (string, error) {
 // certain endpoint group.
 func (api *API) authorizeRequest() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		api.log.Infof("running authorization middleware")
 		// Extract the bearer token
 		headerTokenString, err := extractBearerToken(ctx)
 		if api.check(err, ctx, http.StatusUnauthorized) {
@@ -129,9 +125,6 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 		// is how we obtain the sub, which is then used to lookup the
 		// correct token in the Postgres database.
 		headerToken := oauth2.Token{AccessToken: headerTokenString}
-		api.log.Infof("attempting to authorize request with token %s",
-			headerTokenString,
-		)
 
 		// Get user info to obtain the sub
 		u, err := api.getUserInfo(&headerToken)
@@ -144,9 +137,6 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 			return
 		}
 
-		api.log.Debugf("correctToken: %s", correctToken)
-		api.log.Debugf(" headerToken: %s", headerToken.AccessToken)
-
 		// Check if the token provided in the authorization header equals the
 		// token from the database. If an only if this is true will the user
 		// gain authorization to the protected resources.
@@ -155,7 +145,6 @@ func (api *API) authorizeRequest() gin.HandlerFunc {
 			api.check(errUnauthorized, ctx, http.StatusUnauthorized)
 			return
 		}
-		api.log.Infof("authorized request")
 		ctx.Next()
 	}
 }
@@ -187,11 +176,6 @@ func (api *API) authenticate(ctx *gin.Context, username string) error {
 	return nil
 }
 
-// home handles requests to the home ("/home").
-func (api *API) home(ctx *gin.Context) {
-	ctx.Writer.Write([]byte("welcome home!"))
-}
-
 // login handles a request to login.
 func (api *API) login(ctx *gin.Context) {
 	api.log.Infof("request to login")
@@ -214,16 +198,12 @@ func (api *API) login(ctx *gin.Context) {
 		return
 	}
 
-	api.log.Debugf("generated random token %s", state)
-
 	// Respond with the URL to "Sign in with Google"
 	ctx.JSON(http.StatusOK, api.getLoginURL(state))
 }
 
 // authorize is the Google authorization callback URL.
 func (api *API) authorize(ctx *gin.Context) {
-	api.log.Infof("request to authorize callback")
-
 	// Decode the request
 	var request authorizeRequest
 	err := ctx.ShouldBindJSON(&request)
@@ -241,27 +221,20 @@ func (api *API) authorize(ctx *gin.Context) {
 	session := sessions.Default(ctx)
 	sessionState := session.Get("state")
 
-	api.log.Debugf("  query state: %s", queryState.Value)
-	api.log.Debugf("session state: %v", sessionState)
-
 	// Compare the two states
 	if queryState.Value != sessionState { // Compare session and query states
 		api.check(fmt.Errorf("invalid query state: %v", queryState.Value),
 			ctx, http.StatusUnauthorized)
 		return
 	}
-	api.log.Infof("session is valid")
 
 	// If they have a token already, don't issue a new one
 	_, err = ctx.Request.Cookie("token")
 	if err == nil {
 		// Maybe search PG database to see if its valid
-		api.log.Infof("client has token")
 		ctx.JSON(http.StatusOK, ok())
 		return
 	}
-
-	api.log.Infof("must fetch new token")
 
 	// Handle the exchange code to initiate a transport and get a token
 	token, err := api.oauthConfig.Exchange(
@@ -271,7 +244,6 @@ func (api *API) authorize(ctx *gin.Context) {
 	if api.check(err, ctx, http.StatusUnauthorized) {
 		return
 	}
-	api.log.Debugf("transport initiated, fetched token %s", token.AccessToken)
 
 	// Construct the client to get the sub.
 	u, err := api.getUserInfo(token)
@@ -285,8 +257,6 @@ func (api *API) authorize(ctx *gin.Context) {
 		return
 	}
 
-	api.log.Infof("inserted token entry into database for email %s", u.Email)
-
 	// Try and get user from database to determine whether to update,
 	// add, or do nothing
 	stringUsername, err := models.UsernameFromEmail(u.Email)
@@ -296,7 +266,6 @@ func (api *API) authorize(ctx *gin.Context) {
 	dbUser, err := api.database.GetUser(string(stringUsername))
 	cookieUsername := dbUser.Username
 	if string(dbUser.Username) == "" { // If the user does not exist
-		fmt.Printf("IM IN HERE\n\n")
 		newUser, err := models.NewUser(u.Email, models.Freshman, true)
 		if api.check(err, ctx) {
 			return
@@ -304,9 +273,7 @@ func (api *API) authorize(ctx *gin.Context) {
 		newUser.ProfilePic = u.Picture // Get and set the profile picture
 		api.database.AddUser(newUser)
 		cookieUsername = newUser.Username
-
 		api.log.Infof("added user %s to database (in authorization)", u.Email)
-
 	} else { // If the user EXISTS
 		if dbUser.Registered == false { // If this is their first login
 			// Update the account's profile picture and registration
@@ -334,5 +301,7 @@ func (api *API) authorize(ctx *gin.Context) {
 		Secure: false,
 	})
 
-	ctx.JSON(http.StatusOK, ok()) // Do this
+	api.log.Infof("authorized %s", u.Email)
+
+	ctx.JSON(http.StatusOK, ok())
 }
