@@ -52,8 +52,6 @@ func (api *API) initializeOAuth() {
 
 // initializeOAuthRoutes initializes the OAuth2-related API routes.
 func (api *API) initializeOAuthRoutes() {
-	api.router.GET("/home", api.home)
-
 	api.router.GET(path.Join(api.oauthRoot, "login"), api.login)
 	api.router.POST(path.Join(api.oauthRoot, "authorize"), api.authorize)
 
