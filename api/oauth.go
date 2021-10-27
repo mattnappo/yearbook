@@ -11,9 +11,9 @@ import (
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/xoreo/yearbook/common"
-	"github.com/xoreo/yearbook/crypto"
-	"github.com/xoreo/yearbook/models"
+	"github.com/mattnappo/yearbook/common"
+	"github.com/mattnappo/yearbook/crypto"
+	"github.com/mattnappo/yearbook/models"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )

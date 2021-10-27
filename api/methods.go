@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/xoreo/yearbook/common"
-	"github.com/xoreo/yearbook/models"
+	"github.com/mattnappo/yearbook/common"
+	"github.com/mattnappo/yearbook/models"
 )
 
 // createPost creates a new post.

@@ -8,8 +8,8 @@ import (
 	"sync"
 
 	"github.com/go-pg/pg/v9"
-	"github.com/xoreo/yearbook/common"
-	"github.com/xoreo/yearbook/models"
+	"github.com/mattnappo/yearbook/common"
+	"github.com/mattnappo/yearbook/models"
 )
 
 type connStatus int

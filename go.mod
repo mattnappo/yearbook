@@ -1,4 +1,4 @@
-module github.com/xoreo/yearbook
+module github.com/mattnappo/yearbook
 
 go 1.14
 

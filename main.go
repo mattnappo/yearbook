@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/xoreo/yearbook/api"
-	"github.com/xoreo/yearbook/common"
-	"github.com/xoreo/yearbook/database"
+	"github.com/mattnappo/yearbook/api"
+	"github.com/mattnappo/yearbook/common"
+	"github.com/mattnappo/yearbook/database"
 )
 
 var (

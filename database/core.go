@@ -2,7 +2,7 @@ package database
 
 import (
 	"github.com/go-pg/pg"
-	"github.com/xoreo/yearbook/models"
+	"github.com/mattnappo/yearbook/models"
 )
 
 // AddPost adds a post to the database.

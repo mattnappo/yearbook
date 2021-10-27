@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xoreo/yearbook/common"
-	"github.com/xoreo/yearbook/crypto"
+	"github.com/mattnappo/yearbook/common"
+	"github.com/mattnappo/yearbook/crypto"
 )
 
 var (

@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xoreo/yearbook/models"
+	"github.com/mattnappo/yearbook/models"
 )
 
 func genRandUser() string {

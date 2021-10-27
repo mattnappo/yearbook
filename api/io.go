@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/xoreo/yearbook/models"
+	"github.com/mattnappo/yearbook/models"
 )
 
 // createUserRequest is the structure of a request to create a new user.

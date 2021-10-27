@@ -18,9 +18,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/juju/loggo"
 	"github.com/juju/loggo/loggocolor"
-	"github.com/xoreo/yearbook/common"
-	"github.com/xoreo/yearbook/database"
-	"github.com/xoreo/yearbook/models"
+	"github.com/mattnappo/yearbook/common"
+	"github.com/mattnappo/yearbook/database"
+	"github.com/mattnappo/yearbook/models"
 	"golang.org/x/oauth2"
 )
 
